@@ -48,7 +48,7 @@ export default function App() {
       />
 
       {/* Main Content Area with breathing room for floating navbar */}
-      <main className="flex-1 pt-16 sm:pt-20 pb-12 w-full">
+      <main className="flex-1 pt-15 sm:pt-18 pb-6 w-full">
         {activeTab === 'hub' && (
           <CustomerReviewsHub
             onNavigateWrite={() => setActiveTab('submit')}

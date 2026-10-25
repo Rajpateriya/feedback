@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { api } from '../api/client';
 
 const SHOE_PRODUCTS = [
-  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Lifestyle / Air Cushion' },
-  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Running' },
-  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 Retro High OG', category: 'Basketball / Heritage' },
-  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle / Suede' },
-  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Maximum Cushion / Road' },
-  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail Running / Gorpcore' },
+  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning' },
+  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run' },
+  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic' },
+  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle' },
+  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Max Road Cushion' },
+  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail / All-Terrain' },
 ];
 
 const SHOE_TAGS = [
   'Cushioning & Bounce', 'True to Size', 'Arch Support', 'Breathability',
-  'Ankle Lockdown', 'Continental Grip', 'Wide Foot Friendly', 'Durable Outsole',
-  'High Stack Height', 'Lightweight Feel'
+  'Ankle Lockdown', 'Continental Grip', 'Wide Foot Friendly', 'Durable Outsole'
 ];
 
 const SAMPLE_SHOE_PHOTOS = [
@@ -49,16 +48,15 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
 
   const getRatingLabel = (val) => {
     switch (val) {
-      case 5: return '5 Stars - Exceptional Cushion & Fit';
-      case 4: return '4 Stars - Great Shoe, Minor Sizing Nuance';
-      case 3: return '3 Stars - Average Comfort';
-      case 2: return '2 Stars - Below Expectations / Stiff';
-      case 1: return '1 Star - Unsatisfactory Fit or Quality';
+      case 5: return '5★ - Exceptional Cushion';
+      case 4: return '4★ - Highly Satisfied';
+      case 3: return '3★ - Average Comfort';
+      case 2: return '2★ - Below Expectations';
+      case 1: return '1★ - Unsatisfactory';
       default: return 'Select Rating';
     }
   };
 
-  // Handle local file uploads (supports up to 6 photos)
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -87,9 +85,8 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
       reader.readAsDataURL(file);
     });
 
-    // Reset input value so same files can be re-selected if needed
     e.target.value = '';
-    showToast?.(`Added photo(s). (${Math.min(6, photos.length + filesToProcess.length)}/6 uploaded)`, 'success');
+    showToast?.(`Photo(s) added (${Math.min(6, photos.length + filesToProcess.length)}/6)`, 'success');
   };
 
   const removePhoto = (indexToRemove) => {
@@ -98,7 +95,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
 
   const loadSamplePhotos = () => {
     setPhotos(SAMPLE_SHOE_PHOTOS);
-    showToast?.('Loaded 6 high-res shoe photos!', 'success');
+    showToast?.('Loaded 6 sample sneaker photos!', 'success');
   };
 
   const handleSubmit = async (e) => {
@@ -128,7 +125,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
 
       const res = await api.submitReview(payload);
       setSubmittedResult(res);
-      showToast?.('Shoe review processed by Trust Engine', 'success');
+      showToast?.('Shoe review published live!', 'success');
       onReviewSubmitted?.();
     } catch (err) {
       console.error(err);
@@ -149,33 +146,22 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       
-      {/* Result Confirmation Banner */}
+      {/* Result Confirmation Toast Banner */}
       {submittedResult && (
-        <div className="mb-4 p-4 rounded-2xl bg-white border border-purple-200/90 shadow-[0_4px_20px_rgba(147,51,234,0.06)] animate-in zoom-in-95 duration-150">
-          <div className="flex items-start justify-between gap-3">
+        <div className="mb-3 p-3.5 rounded-2xl bg-white border border-purple-200/90 shadow-[0_4px_20px_rgba(147,51,234,0.06)] animate-in zoom-in-95 duration-150">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white ${
-                submittedResult.status === 'approved' 
-                  ? 'bg-gradient-to-tr from-purple-700 to-violet-600' 
-                  : submittedResult.status === 'flagged' 
-                  ? 'bg-rose-600' 
-                  : 'bg-purple-900'
-              }`}>
-                <span className="material-symbols-outlined text-[18px]">
-                  {submittedResult.status === 'approved' ? 'verified' : 
-                   submittedResult.status === 'flagged' ? 'warning' : 'pending_actions'}
-                </span>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-600 text-white flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">verified</span>
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-purple-950">
-                  {submittedResult.status === 'approved' && 'Shoe Review Verified & Published Live!'}
-                  {submittedResult.status === 'pending' && 'Shoe Review Queued for Fast Moderation'}
-                  {submittedResult.status === 'flagged' && 'Review Flagged for Safety Verification'}
+                  {submittedResult.status === 'approved' ? 'Shoe Review Verified & Published!' : 'Review Queued for Verification'}
                 </h3>
                 <p className="text-[11px] text-purple-900/60 mt-0.5">
-                  AI Sentiment Score: <strong>{(submittedResult.sentiment_score * 100).toFixed(0)}%</strong> &bull; Toxicity Risk: <strong>{(submittedResult.toxicity_score * 100).toFixed(0)}%</strong> &bull; Photos Attached: <strong>{(submittedResult.images || []).length}</strong>
+                  AI Trust: <strong>{(submittedResult.sentiment_score * 100).toFixed(0)}%</strong> &bull; Photos Attached: <strong>{(submittedResult.images || []).length}</strong>
                 </p>
               </div>
             </div>
@@ -190,324 +176,327 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
         </div>
       )}
 
-      {/* Main Form Container */}
-      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)] p-6 sm:p-7 space-y-5">
+      {/* Main Broad Card: Full Width max-w-6xl */}
+      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)] p-4 sm:p-5 lg:p-6 transition-all">
         
-        {/* Header */}
-        <div className="border-b border-purple-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full border border-purple-200">
-                Shoe Wear-Test Verification
-              </span>
-              <span className="text-[11px] text-purple-400">&bull; Up to 6 Photos Supported</span>
+        {/* Top Header Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-purple-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-700 to-violet-600 flex items-center justify-center text-white shadow-xs">
+              <span className="material-symbols-outlined text-[16px]">rate_review</span>
             </div>
-            <h1 className="font-headline text-lg sm:text-xl font-bold text-purple-950 tracking-tight mt-1">
-              Submit Shoe Wear Review
-            </h1>
-            <p className="text-xs text-purple-900/70 mt-0.5">
-              Share real-world feedback on sneaker fit, outsole durability, cushioning recoil, and comfort.
-            </p>
+            <div>
+              <h1 className="font-headline text-sm sm:text-base font-bold text-purple-950 tracking-tight">
+                Submit Footwear Wear-Test Review
+              </h1>
+              <p className="text-[11px] text-purple-900/60">
+                Share authentic feedback with up to 6 on-foot and detail photos.
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={loadSamplePhotos}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold border border-purple-200 transition-colors"
+            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-[11px] font-bold border border-purple-200/80 transition-colors"
           >
-            <span className="material-symbols-outlined text-[15px] text-purple-600">auto_fix_high</span>
+            <span className="material-symbols-outlined text-[14px] text-purple-600">auto_fix_high</span>
             ⚡ Load 6 Sample Shoe Photos
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          
-          {/* Step 1: Select Shoe Product */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-purple-950">
-              Select Footwear Silhouette <span className="text-rose-500">*</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              {SHOE_PRODUCTS.map((prod) => {
-                const isSelected = selectedProduct.sku === prod.sku;
-                return (
-                  <button
-                    key={prod.sku}
-                    type="button"
-                    onClick={() => setSelectedProduct(prod)}
-                    className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between ${
-                      isSelected
-                        ? 'bg-purple-50/80 border-purple-600 ring-2 ring-purple-600/30'
-                        : 'bg-white border-purple-100 hover:border-purple-300'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-[9px] font-bold text-purple-500 uppercase">{prod.category}</div>
-                      <div className="font-bold text-xs text-purple-950 mt-0.5">{prod.name}</div>
-                    </div>
-                    <div className="font-mono text-[9px] text-purple-600 mt-1">{prod.sku}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 2: Rating */}
-          <div className="space-y-1 pt-1">
-            <label className="block text-xs font-semibold text-purple-950">
-              Overall Rating <span className="text-rose-500">*</span>
-            </label>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-0.5 text-amber-400">
-                {[1, 2, 3, 4, 5].map((star) => {
-                  const isFilled = (hoverRating || rating) >= star;
-                  return (
-                    <button
-                      key={star}
-                      type="button"
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setRating(star)}
-                      className="p-0.5 focus:outline-none transition-transform hover:scale-110"
-                    >
-                      <span className={`material-symbols-outlined text-[24px] ${isFilled ? 'material-symbols-filled' : ''}`}>
-                        {isFilled ? 'star' : 'star_border'}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="text-xs font-bold text-purple-900 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
-                {getRatingLabel(hoverRating || rating)}
-              </span>
-            </div>
-          </div>
-
-          {/* Step 3: Photo Upload for Shoes (Up to 6 Photos) */}
-          <div className="space-y-2 pt-2 border-t border-purple-100">
-            <div className="flex items-center justify-between">
+        {/* Form Body: Balanced 2-Column Responsive Layout */}
+        <form onSubmit={handleSubmit} className="text-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            
+            {/* LEFT COLUMN: Shoe Selector, Rating, Tags, Customer Info (5 cols on lg) */}
+            <div className="lg:col-span-5 space-y-3">
+              
+              {/* 1. Footwear Silhouette Selector */}
               <div>
-                <label className="block text-xs font-bold text-purple-950">
-                  Customer Shoe Photos <span className="text-purple-500 font-normal">({photos.length} / 6 uploaded)</span>
+                <label className="block text-[11px] font-bold text-purple-950 mb-1">
+                  1. Select Shoe Model <span className="text-rose-500">*</span>
                 </label>
-                <p className="text-[11px] text-purple-900/60 mt-0.5">
-                  Upload up to 6 on-foot, outsole, or in-hand sneaker photos to increase trust score.
-                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {SHOE_PRODUCTS.map((prod) => {
+                    const isSelected = selectedProduct.sku === prod.sku;
+                    return (
+                      <button
+                        key={prod.sku}
+                        type="button"
+                        onClick={() => setSelectedProduct(prod)}
+                        className={`p-2 rounded-xl text-left border transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-purple-50/90 border-purple-600 ring-1 ring-purple-600/40 shadow-2xs'
+                            : 'bg-white border-purple-100 hover:border-purple-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="text-[8px] font-bold text-purple-500 uppercase tracking-tight">{prod.category}</div>
+                          <div className="font-bold text-[11px] text-purple-950 mt-0.5 leading-snug">{prod.name}</div>
+                        </div>
+                        <div className="font-mono text-[9px] text-purple-600 mt-1">{prod.sku}</div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {photos.length < 6 && (
-                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-xs transition-colors">
-                  <span className="material-symbols-outlined text-[16px]">add_a_photo</span>
-                  <span>Add Photos</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-
-            {/* Photo Preview Grid (Up to 6 photos) */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 pt-1">
-              {photos.map((imgUrl, index) => (
-                <div 
-                  key={index} 
-                  className="relative group aspect-square rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-xs"
-                >
-                  <img
-                    src={imgUrl}
-                    alt={`Shoe upload ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-xs text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-medium">
-                    Photo {index + 1}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(index)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-85 hover:opacity-100 transition-opacity"
-                    title="Remove this photo"
-                  >
-                    <span className="material-symbols-outlined text-[13px]">close</span>
-                  </button>
+              {/* 2. Rating */}
+              <div className="p-2.5 rounded-xl bg-purple-50/50 border border-purple-100 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const isFilled = (hoverRating || rating) >= star;
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none transition-transform hover:scale-115"
+                      >
+                        <span className={`material-symbols-outlined text-[20px] ${isFilled ? 'material-symbols-filled' : ''}`}>
+                          {isFilled ? 'star' : 'star_border'}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
+                <span className="text-[10px] font-bold text-purple-900 bg-white px-2 py-0.5 rounded-md border border-purple-200">
+                  {getRatingLabel(hoverRating || rating)}
+                </span>
+              </div>
 
-              {/* Empty placeholder slots */}
-              {Array.from({ length: 6 - photos.length }).map((_, i) => (
-                <label
-                  key={`empty-${i}`}
-                  className="aspect-square rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/40 hover:bg-purple-50/80 flex flex-col items-center justify-center text-purple-400 hover:text-purple-600 transition-colors cursor-pointer group"
-                >
-                  <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">add_photo_alternate</span>
-                  <span className="text-[10px] font-medium mt-1">Slot {photos.length + i + 1}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
+              {/* 3. Shoe Attribute Tags */}
+              <div>
+                <label className="block text-[11px] font-bold text-purple-950 mb-1">
+                  Shoe Fit & Feel Tags
                 </label>
-              ))}
-            </div>
-          </div>
+                <div className="flex flex-wrap gap-1">
+                  {SHOE_TAGS.map((tag) => {
+                    const isSelected = selectedTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-all ${
+                          isSelected
+                            ? 'bg-purple-700 text-white shadow-2xs'
+                            : 'bg-purple-50 text-purple-800 border border-purple-200/80 hover:bg-purple-100'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-          {/* Step 4: Review Details */}
-          <div className="space-y-3 pt-2 border-t border-purple-100">
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-purple-950">
-                Headline / Headline Takeaway <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Next level heel recoil for marathon prep"
-                className="w-full h-9 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all"
-              />
-            </div>
+              {/* 4. Customer Info */}
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-purple-100">
+                <div>
+                  <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
+                    Your Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Marcus Vance"
+                    className="w-full h-7.5 px-2.5 rounded-lg bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600"
+                  />
+                </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-purple-950">
-                Written Review Body <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder="Describe fit, arch support, breathability, and ground feel across surfaces..."
-                className="w-full p-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all leading-relaxed"
-              ></textarea>
-            </div>
-          </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
+                    Email <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="marcus@sneakers.com"
+                    className="w-full h-7.5 px-2.5 rounded-lg bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600"
+                  />
+                </div>
+              </div>
 
-          {/* Step 5: Shoe Tags */}
-          <div className="space-y-1.5 pt-1">
-            <label className="block text-xs font-semibold text-purple-950">
-              Shoe Attributes & Feel
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {SHOE_TAGS.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                      isSelected
-                        ? 'bg-purple-700 text-white shadow-xs'
-                        : 'bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100'
-                    }`}
+              {/* 5. Channel & Verification Checkboxes */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                  <span className="text-[10px] text-purple-900/70 font-semibold whitespace-nowrap">Channel:</span>
+                  <select
+                    value={channel}
+                    onChange={(e) => setChannel(e.target.value)}
+                    className="h-6.5 px-2 rounded-lg bg-purple-50/60 border border-purple-200 text-[10px] text-purple-950 focus:outline-none focus:border-purple-600 font-medium"
                   >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    <option value="Direct Web">Direct Web</option>
+                    <option value="Shopify Store">Shopify Store</option>
+                    <option value="Amazon Global">Amazon Global</option>
+                    <option value="In-App iOS">In-App iOS</option>
+                  </select>
+                </div>
 
-          {/* Step 6: Customer Details & Channel */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-purple-100">
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-purple-950">
-                Customer Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Marcus Vance"
-                className="w-full h-8 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-purple-600"
-              />
-            </div>
+                <div className="flex items-center gap-3 text-[10px] font-medium text-purple-950">
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={recommend}
+                      onChange={(e) => setRecommend(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-purple-600 focus:ring-purple-500"
+                    />
+                    <span>Recommends Shoe</span>
+                  </label>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-purple-950">
-                Customer Email <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="marcus@sneakers.com"
-                className="w-full h-8 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-purple-600"
-              />
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={verifiedPurchase}
+                      onChange={(e) => setVerifiedPurchase(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-purple-600 focus:ring-purple-500"
+                    />
+                    <span>Verified Buyer</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-purple-950">
-                Retail / Ingestion Channel
-              </label>
-              <select
-                value={channel}
-                onChange={(e) => setChannel(e.target.value)}
-                className="w-full h-8 px-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-purple-600"
-              >
-                <option value="Direct Web">Direct Web</option>
-                <option value="Shopify Store">Shopify Store</option>
-                <option value="Amazon Global">Amazon Global</option>
-                <option value="In-App iOS">In-App iOS</option>
-              </select>
+            {/* RIGHT COLUMN: Photo Upload (Up to 6), Review Title & Body, Submit Button (7 cols on lg) */}
+            <div className="lg:col-span-7 space-y-3 lg:border-l border-purple-100 lg:pl-5">
+              
+              {/* Photo Upload Header & 6-Slots Grid */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px] text-purple-600">photo_library</span>
+                    <label className="text-[11px] font-bold text-purple-950">
+                      Shoe Photos ({photos.length} / 6 uploaded)
+                    </label>
+                  </div>
+
+                  {photos.length < 6 && (
+                    <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold shadow-2xs transition-colors">
+                      <span className="material-symbols-outlined text-[14px]">add_a_photo</span>
+                      <span>Upload Photos</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {/* 6 Photo Slots Grid */}
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {photos.map((imgUrl, index) => (
+                    <div 
+                      key={index} 
+                      className="relative group aspect-square rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-2xs"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`Shoe upload ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] px-1 py-0.2 rounded font-mono font-medium">
+                        {index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-1 right-1 w-4.5 h-4.5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity"
+                        title="Remove photo"
+                      >
+                        <span className="material-symbols-outlined text-[11px]">close</span>
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Empty slots to complete up to 6 */}
+                  {Array.from({ length: 6 - photos.length }).map((_, i) => (
+                    <label
+                      key={`empty-${i}`}
+                      className="aspect-square rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-500 bg-purple-50/30 hover:bg-purple-50/70 flex flex-col items-center justify-center text-purple-400 hover:text-purple-700 transition-colors cursor-pointer group"
+                    >
+                      <span className="material-symbols-outlined text-[17px] group-hover:scale-110 transition-transform">add_photo_alternate</span>
+                      <span className="text-[9px] font-medium mt-0.5">Slot {photos.length + i + 1}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Headline Takeaway */}
+              <div>
+                <label className="block text-[11px] font-bold text-purple-950 mb-1">
+                  Review Headline <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Next level heel recoil for marathon prep and daily wear"
+                  className="w-full h-8 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all placeholder:text-purple-300"
+                />
+              </div>
+
+              {/* Written Review Body (Compact 3 rows to keep non-scrollable) */}
+              <div>
+                <label className="block text-[11px] font-bold text-purple-950 mb-1">
+                  Written Feedback <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder="Describe ground feel, cushioning rebound, toe-box width, and outsole durability across surfaces..."
+                  className="w-full p-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all leading-relaxed placeholder:text-purple-300"
+                ></textarea>
+              </div>
+
+              {/* Submit Action Strip */}
+              <div className="pt-2 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-3 py-1.5 rounded-xl text-[11px] font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
+                >
+                  Clear Form
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white text-xs font-bold shadow-md shadow-purple-300 transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-98"
+                >
+                  {submitting ? (
+                    <>
+                      <span className="material-symbols-outlined text-[15px] animate-spin">refresh</span>
+                      <span>Publishing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[15px]">send</span>
+                      <span>Submit Review ({photos.length} Photos)</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Step 7: Checkboxes */}
-          <div className="flex flex-wrap items-center gap-5 pt-1 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-purple-950 font-medium">
-              <input
-                type="checkbox"
-                checked={recommend}
-                onChange={(e) => setRecommend(e.target.checked)}
-                className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
-              />
-              <span>I recommend this shoe to other runners & sneakerheads</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer text-purple-950 font-medium">
-              <input
-                type="checkbox"
-                checked={verifiedPurchase}
-                onChange={(e) => setVerifiedPurchase(e.target.checked)}
-                className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
-              />
-              <span>Verified Purchase (Receipt / Order matched)</span>
-            </label>
-          </div>
-
-          {/* Submit Action */}
-          <div className="pt-3 border-t border-purple-100 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
-            >
-              Clear Form
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white text-xs font-bold shadow-md shadow-purple-300 transition-all flex items-center gap-2 disabled:opacity-50"
-            >
-              {submitting ? (
-                <>
-                  <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                  <span>Validating Trust & Photos...</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[16px]">send</span>
-                  <span>Submit Shoe Review ({photos.length} Photos)</span>
-                </>
-              )}
-            </button>
           </div>
         </form>
       </div>
