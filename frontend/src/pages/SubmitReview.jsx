@@ -140,7 +140,7 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
       showToast?.('Review published successfully!', 'success');
       onReviewSubmitted?.();
       
-      // Auto close after brief display if in modal mode
+      // Auto close after brief display
       setTimeout(() => {
         if (onClose) onClose();
       }, 1500);
@@ -168,7 +168,7 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
       onClick={onClose}
     >
       <div 
-        className="relative bg-white rounded-3xl border border-purple-200/90 shadow-[0_24px_70px_rgba(81,34,254,0.22)] max-w-2xl w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto animate-in zoom-in-95 duration-150 my-auto"
+        className="relative bg-white rounded-3xl border border-purple-200/90 shadow-[0_24px_70px_rgba(81,34,254,0.22)] max-w-4xl lg:max-w-5xl w-full p-4 sm:p-6 animate-in zoom-in-95 duration-150 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Modal Button */}
@@ -183,36 +183,34 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
           </button>
         )}
 
-        {/* Result Confirmation Banner */}
+        {/* Success Banner if submitted */}
         {submittedResult && (
-          <div className="mb-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
-                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+          <div className="mb-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                <span className="material-symbols-outlined text-[18px]">check_circle</span>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-emerald-950">
-                  Review Published Live to Feed!
-                </h3>
-                <p className="text-xs text-emerald-800/80 mt-0.5">
-                  AI Sentiment Score: {(submittedResult.sentiment_score * 100).toFixed(0)}% &bull; Photos Attached: {(submittedResult.images || []).length} / 6
-                </p>
+              <div className="text-xs">
+                <strong className="text-emerald-950">Review Published Live to Feed!</strong>
+                <span className="text-emerald-800 ml-2">
+                  AI Sentiment: {(submittedResult.sentiment_score * 100).toFixed(0)}% &bull; Photos Attached: {(submittedResult.images || []).length} / 6
+                </span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Modal Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-purple-100 pr-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-md shadow-[#5122fe]/25 shrink-0">
-              <span className="material-symbols-outlined text-[20px]">rate_review</span>
+        {/* Modal Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-purple-100 pr-8">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-md shadow-[#5122fe]/25 shrink-0">
+              <span className="material-symbols-outlined text-[18px]">rate_review</span>
             </div>
             <div>
-              <h1 className="font-headline text-lg font-bold text-purple-950 tracking-tight">
+              <h1 className="font-headline text-base sm:text-lg font-bold text-purple-950 tracking-tight">
                 Write a Shoe Review
               </h1>
-              <p className="text-xs text-purple-900/60 mt-0.5">
+              <p className="text-[11px] text-purple-900/60">
                 Share authentic fit feedback, wear rating, and on-foot photos.
               </p>
             </div>
@@ -221,283 +219,302 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
           <button
             type="button"
             onClick={loadSamplePhotos}
-            className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5122fe] text-xs font-semibold border border-purple-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            className="self-start sm:self-auto px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5122fe] text-[11px] font-semibold border border-purple-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             title="Populate test data instantly"
           >
-            <span className="material-symbols-outlined text-[15px] text-[#5122fe]">auto_fix_high</span>
+            <span className="material-symbols-outlined text-[14px] text-[#5122fe]">auto_fix_high</span>
             <span>⚡ Load Sample Data</span>
           </button>
         </div>
 
-        {/* Clean Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-4.5 text-xs sm:text-sm">
+        {/* 2-Column Wide Form (Completely Non-Scrollable Layout) */}
+        <form onSubmit={handleSubmit} className="text-xs">
           
-          {/* 1. Shoe Model Dropdown */}
-          <div className="space-y-1">
-            <label className="block text-xs font-bold text-purple-950">
-              Select Shoe Model <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <select
-                value={selectedProduct.sku}
-                onChange={(e) => {
-                  const prod = SHOE_PRODUCTS.find(p => p.sku === e.target.value);
-                  if (prod) setSelectedProduct(prod);
-                }}
-                className="w-full h-10.5 px-3.5 pr-10 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 font-medium focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
-              >
-                {SHOE_PRODUCTS.map((prod) => (
-                  <option key={prod.sku} value={prod.sku}>
-                    {prod.name} — {prod.category} ({prod.sku})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-purple-500 flex items-center">
-                <span className="material-symbols-outlined text-[20px]">expand_more</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Star Rating */}
-          <div className="space-y-1">
-            <label className="block text-xs font-bold text-purple-950">
-              Overall Rating <span className="text-rose-500">*</span>
-            </label>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-amber-400">
-                {[1, 2, 3, 4, 5].map((star) => {
-                  const isFilled = (hoverRating || rating) >= star;
-                  return (
-                    <button
-                      key={star}
-                      type="button"
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setRating(star)}
-                      className="focus:outline-none transition-transform hover:scale-120 cursor-pointer p-0.5"
-                    >
-                      <span className={`material-symbols-outlined text-[24px] ${isFilled ? 'material-symbols-filled text-amber-400' : 'text-purple-200'}`}>
-                        star
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="text-xs font-semibold text-purple-900 bg-purple-50 px-2.5 py-0.8 rounded-lg border border-purple-200">
-                {getRatingLabel(hoverRating || rating)}
-              </span>
-            </div>
-          </div>
-
-          {/* 3. Review Title */}
-          <div className="space-y-1">
-            <label className="block text-xs font-bold text-purple-950">
-              Review Title <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Incredibly comfortable with great arch support"
-              className="w-full h-10 px-3.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all placeholder:text-purple-300"
-            />
-          </div>
-
-          {/* 4. Written Feedback */}
-          <div className="space-y-1">
-            <label className="block text-xs font-bold text-purple-950">
-              Written Feedback <span className="text-rose-500">*</span>
-            </label>
-            <textarea
-              required
-              rows={3}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Describe ground feel, cushioning rebound, toe-box width, and outsole durability across surfaces..."
-              className="w-full p-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all leading-relaxed placeholder:text-purple-300"
-            ></textarea>
-          </div>
-
-          {/* 5. Clean Image Upload Gallery (Up to 6 photos) */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-purple-950 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[17px] text-[#5122fe]">photo_camera</span>
-                <span>Shoe Photos ({photos.length} / 6 uploaded)</span>
-              </label>
-              <span className="text-[11px] text-purple-400">Up to 6 images</span>
-            </div>
-
-            {/* Photo Thumbnails Row */}
-            <div className="flex flex-wrap items-center gap-2.5 p-2.5 rounded-2xl bg-purple-50/30 border border-purple-100">
-              {photos.map((imgUrl, index) => (
-                <div 
-                  key={index} 
-                  className="relative group w-18 h-18 rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-xs shrink-0"
-                >
-                  <img
-                    src={imgUrl}
-                    alt={`Upload ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(index)}
-                    className="absolute top-1 right-1 w-4.5 h-4.5 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-xs cursor-pointer"
-                    title="Remove photo"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            
+            {/* ========================================================= */}
+            {/* LEFT COLUMN: Shoe Model, Rating, Title, Review Body, Tags */}
+            {/* ========================================================= */}
+            <div className="space-y-3">
+              
+              {/* 1. Shoe Model Dropdown */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-purple-950">
+                  Select Shoe Model <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedProduct.sku}
+                    onChange={(e) => {
+                      const prod = SHOE_PRODUCTS.find(p => p.sku === e.target.value);
+                      if (prod) setSelectedProduct(prod);
+                    }}
+                    className="w-full h-9 px-3 pr-8 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 font-medium focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
                   >
-                    <span className="material-symbols-outlined text-[11px]">close</span>
-                  </button>
-                  <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] px-1 py-0.2 rounded font-mono font-medium">
-                    #{index + 1}
+                    {SHOE_PRODUCTS.map((prod) => (
+                      <option key={prod.sku} value={prod.sku}>
+                        {prod.name} — {prod.category} ({prod.sku})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-purple-500 flex items-center">
+                    <span className="material-symbols-outlined text-[18px]">expand_more</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Star Rating */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-purple-950">
+                    Overall Rating <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[11px] font-semibold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                    {getRatingLabel(hoverRating || rating)}
                   </span>
                 </div>
-              ))}
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const isFilled = (hoverRating || rating) >= star;
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none transition-transform hover:scale-115 cursor-pointer p-0.5"
+                      >
+                        <span className={`material-symbols-outlined text-[22px] ${isFilled ? 'material-symbols-filled text-amber-400' : 'text-purple-200'}`}>
+                          star
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-              {/* Upload Tile */}
-              {photos.length < 6 && (
-                <label className="w-18 h-18 rounded-xl border-2 border-dashed border-purple-300 hover:border-[#5122fe] bg-white hover:bg-purple-50/60 flex flex-col items-center justify-center text-purple-500 hover:text-[#5122fe] cursor-pointer transition-all p-1 text-center group shrink-0">
-                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform text-[#5122fe]">add_a_photo</span>
-                  <span className="text-[9px] font-bold mt-0.5 text-purple-950">Add Photo</span>
-                  <span className="text-[8px] text-purple-400">{photos.length}/6</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
+              {/* 3. Review Title */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-purple-950">
+                  Review Title <span className="text-rose-500">*</span>
                 </label>
-              )}
-            </div>
-          </div>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Incredibly comfortable with great arch support"
+                  className="w-full h-8.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe]/20 transition-all placeholder:text-purple-300"
+                />
+              </div>
 
-          {/* 6. Fit & Feel Tags */}
-          <div className="space-y-1">
-            <label className="block text-xs font-bold text-purple-950">
-              Fit & Feel Tags
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {SHOE_TAGS.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={`px-2.5 py-0.8 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#5122fe] text-white shadow-xs'
-                        : 'bg-purple-50 text-purple-900/80 hover:bg-purple-100 border border-purple-200/80'
-                    }`}
+              {/* 4. Written Feedback */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-purple-950">
+                  Written Feedback <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder="Describe ground feel, cushioning rebound, toe-box width, and outsole durability across surfaces..."
+                  className="w-full p-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe]/20 transition-all leading-relaxed placeholder:text-purple-300 resize-none"
+                ></textarea>
+              </div>
+
+              {/* 5. Fit & Feel Tags */}
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-purple-950">
+                  Fit & Feel Tags
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  {SHOE_TAGS.map((tag) => {
+                    const isSelected = selectedTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#5122fe] text-white shadow-2xs'
+                            : 'bg-purple-50 text-purple-900/80 hover:bg-purple-100 border border-purple-200/80'
+                        }`}
+                      >
+                        {isSelected ? '✓ ' : '+ '}{tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+
+            {/* ========================================================= */}
+            {/* RIGHT COLUMN: Photo Uploads, Customer Info, Channel, Actions */}
+            {/* ========================================================= */}
+            <div className="space-y-3 flex flex-col justify-between">
+              
+              {/* Photo Upload Gallery (Up to 6 photos) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-purple-950 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-[#5122fe]">photo_camera</span>
+                    <span>Shoe Photos ({photos.length} / 6 uploaded)</span>
+                  </label>
+                  <span className="text-[10px] text-purple-400 font-medium">Up to 6 images</span>
+                </div>
+
+                {/* Photo Grid / Row */}
+                <div className="flex flex-wrap items-center gap-2 p-2 rounded-2xl bg-purple-50/30 border border-purple-100 min-h-[72px]">
+                  {photos.map((imgUrl, index) => (
+                    <div 
+                      key={index} 
+                      className="relative group w-14 h-14 rounded-xl overflow-hidden border border-purple-200 bg-purple-50 shadow-2xs shrink-0"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`Upload ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-2xs cursor-pointer"
+                        title="Remove photo"
+                      >
+                        <span className="material-symbols-outlined text-[10px]">close</span>
+                      </button>
+                      <span className="absolute bottom-0.5 right-0.5 bg-black/60 text-white text-[7px] px-1 rounded font-mono">
+                        #{index + 1}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Add Photo Tile */}
+                  {photos.length < 6 && (
+                    <label className="w-14 h-14 rounded-xl border-2 border-dashed border-purple-300 hover:border-[#5122fe] bg-white hover:bg-purple-50/60 flex flex-col items-center justify-center text-purple-500 hover:text-[#5122fe] cursor-pointer transition-all p-1 text-center group shrink-0">
+                      <span className="material-symbols-outlined text-[16px] group-hover:scale-110 transition-transform text-[#5122fe]">add_a_photo</span>
+                      <span className="text-[8px] font-bold mt-0.5 text-purple-950">Add Photo</span>
+                      <span className="text-[7px] text-purple-400">{photos.length}/6</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Customer Name & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-xs font-bold text-purple-950 mb-1">
+                    Your Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Marcus Vance"
+                    className="w-full h-8.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe]/20 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-purple-950 mb-1">
+                    Email Address <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="marcus@sneakers.com"
+                    className="w-full h-8.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe]/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Channel & Verification Checkboxes */}
+              <div className="bg-purple-50/50 p-2.5 rounded-2xl border border-purple-100 flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-purple-900/70 font-semibold whitespace-nowrap">Channel:</span>
+                  <select
+                    value={channel}
+                    onChange={(e) => setChannel(e.target.value)}
+                    className="h-7 px-2 rounded-lg bg-white border border-purple-200 text-[11px] text-purple-950 focus:outline-none focus:border-[#5122fe] font-medium cursor-pointer"
                   >
-                    {isSelected ? '✓ ' : '+ '}{tag}
-                  </button>
-                );
-              })}
+                    <option value="Direct Web">Direct Web</option>
+                    <option value="Nike SNKRS App">Nike SNKRS App</option>
+                    <option value="Shopify Store">Shopify Store</option>
+                    <option value="Amazon Global">Amazon Global</option>
+                    <option value="In-App iOS">In-App iOS</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs font-medium text-purple-950">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={recommend}
+                      onChange={(e) => setRecommend(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-[#5122fe] accent-[#5122fe]"
+                    />
+                    <span>Recommends</span>
+                  </label>
+
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={verifiedPurchase}
+                      onChange={(e) => setVerifiedPurchase(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-[#5122fe] accent-[#5122fe]"
+                    />
+                    <span>Verified buyer</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Form Action Buttons (Bottom of right column) */}
+              <div className="pt-2 flex items-center justify-between gap-3 border-t border-purple-100">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
+                >
+                  Clear Form
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#5122fe] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5122fe]/25 hover:shadow-lg hover:shadow-[#5122fe]/40 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-98 cursor-pointer"
+                >
+                  {submitting ? (
+                    <>
+                      <span className="material-symbols-outlined text-[15px] animate-spin">refresh</span>
+                      <span>Publishing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[15px]">send</span>
+                      <span>Publish Review {photos.length > 0 && `(${photos.length} Photos)`}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
             </div>
+
           </div>
 
-          {/* 7. Customer Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-purple-100">
-            <div>
-              <label className="block text-xs font-bold text-purple-950 mb-1">
-                Your Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Marcus Vance"
-                className="w-full h-9.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-purple-950 mb-1">
-                Email Address <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="marcus@sneakers.com"
-                className="w-full h-9.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
-              />
-            </div>
-          </div>
-
-          {/* 8. Channel & Checkboxes */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-purple-900/70 font-semibold whitespace-nowrap">Channel:</span>
-              <select
-                value={channel}
-                onChange={(e) => setChannel(e.target.value)}
-                className="h-7.5 px-2.5 rounded-xl bg-purple-50/60 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-[#5122fe] font-medium cursor-pointer"
-              >
-                <option value="Direct Web">Direct Web</option>
-                <option value="Nike SNKRS App">Nike SNKRS App</option>
-                <option value="Shopify Store">Shopify Store</option>
-                <option value="Amazon Global">Amazon Global</option>
-                <option value="In-App iOS">In-App iOS</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs font-medium text-purple-950">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={recommend}
-                  onChange={(e) => setRecommend(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#5122fe] accent-[#5122fe]"
-                />
-                <span>Recommends</span>
-              </label>
-
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={verifiedPurchase}
-                  onChange={(e) => setVerifiedPurchase(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#5122fe] accent-[#5122fe]"
-                />
-                <span>Verified buyer</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Form Actions Footer */}
-          <div className="pt-3 flex items-center justify-between gap-3 border-t border-purple-100">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
-            >
-              Clear Form
-            </button>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5122fe] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5122fe]/25 hover:shadow-lg hover:shadow-[#5122fe]/40 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-98 cursor-pointer"
-            >
-              {submitting ? (
-                <>
-                  <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                  <span>Publishing...</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[16px]">send</span>
-                  <span>Submit Review {photos.length > 0 && `(${photos.length} Photos)`}</span>
-                </>
-              )}
-            </button>
-          </div>
         </form>
       </div>
     </div>
