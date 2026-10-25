@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
+import StaffToolbar from '../components/StaffToolbar';
 
 export default function AdminModerationQueue({ showToast, onQueueUpdated, searchQuery = '' }) {
   const [activeTab, setActiveTab] = useState('pending');
@@ -79,6 +80,9 @@ export default function AdminModerationQueue({ showToast, onQueueUpdated, search
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       
+      {/* Staff Portal Toolbar */}
+      <StaffToolbar pendingCount={metrics.pending_count || 0} />
+
       {/* Top Header & Metrics Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)]">
         <div>

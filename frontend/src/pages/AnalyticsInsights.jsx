@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
+import StaffToolbar from '../components/StaffToolbar';
 
 const SHOE_MODELS = [
   { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning', baseRating: 4.8, baseVolume: 34, verifiedPct: 94, attribute: 'Air Bubble Heel', icon: 'steps' },
@@ -130,6 +131,9 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-6">
       
+      {/* Staff Portal Toolbar */}
+      <StaffToolbar pendingCount={data.pending_count || 0} />
+
       {/* ============================================================== */}
       {/* 1. TOP EXECUTIVE HEADER WITH RANGE SELECTOR & CSV EXPORT */}
       {/* ============================================================== */}
