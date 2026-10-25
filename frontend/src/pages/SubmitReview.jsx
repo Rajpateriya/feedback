@@ -30,7 +30,7 @@ const SAMPLE_SHOE_PHOTOS = [
   'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&auto=format&fit=crop&q=80'
 ];
 
-export default function SubmitReview({ onReviewSubmitted, showToast }) {
+export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted, showToast }) {
   const [selectedProduct, setSelectedProduct] = useState(SHOE_PRODUCTS[0]);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
@@ -45,6 +45,8 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
   const [photos, setPhotos] = useState([]); // Up to 6 photos
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
+
+  if (isOpen === false) return null;
 
   const toggleTag = (tag) => {
     setSelectedTags(prev => 
@@ -137,6 +139,11 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
       setSubmittedResult(res);
       showToast?.('Review published successfully!', 'success');
       onReviewSubmitted?.();
+      
+      // Auto close after brief display if in modal mode
+      setTimeout(() => {
+        if (onClose) onClose();
+      }, 1500);
     } catch (err) {
       console.error(err);
       showToast?.(err.message || 'Error submitting review', 'error');
@@ -156,51 +163,57 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-4">
-      
-      {/* Result Confirmation Banner */}
-      {submittedResult && (
-        <div className="mb-4 p-4 rounded-2xl bg-white border border-purple-200 shadow-[0_4px_24px_rgba(81,34,254,0.06)] animate-in zoom-in-95 duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div 
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="relative bg-white rounded-3xl border border-purple-200/90 shadow-[0_24px_70px_rgba(81,34,254,0.22)] max-w-2xl w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto animate-in zoom-in-95 duration-150 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Modal Button */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center transition-colors cursor-pointer z-10"
+            title="Close popup"
+          >
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        )}
+
+        {/* Result Confirmation Banner */}
+        {submittedResult && (
+          <div className="mb-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-sm shadow-[#5122fe]/30">
-                <span className="material-symbols-outlined text-[20px]">verified</span>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-purple-950">
-                  {submittedResult.status === 'approved' ? 'Review Verified & Published!' : 'Review Queued for Verification'}
+                <h3 className="text-sm font-bold text-emerald-950">
+                  Review Published Live to Feed!
                 </h3>
-                <p className="text-xs text-purple-900/60 mt-0.5">
-                  AI Sentiment Score: <strong>{(submittedResult.sentiment_score * 100).toFixed(0)}%</strong> &bull; Attached Photos: <strong>{(submittedResult.images || []).length} / 6</strong>
+                <p className="text-xs text-emerald-800/80 mt-0.5">
+                  AI Sentiment Score: {(submittedResult.sentiment_score * 100).toFixed(0)}% &bull; Photos Attached: {(submittedResult.images || []).length} / 6
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={resetForm}
-              className="self-start sm:self-auto text-xs font-bold px-4 py-2 rounded-xl bg-[#f5f2ff] text-[#5122fe] hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer"
-            >
-              + Write Another Review
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Simplified, Clean Review Form Card */}
-      <div className="bg-white rounded-3xl border border-purple-200/80 shadow-[0_4px_30px_rgba(81,34,254,0.06)] p-6 sm:p-8 transition-all">
-        
-        {/* Form Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 mb-6 border-b border-purple-100">
+        {/* Modal Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-purple-100 pr-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-md shadow-[#5122fe]/25 shrink-0">
               <span className="material-symbols-outlined text-[20px]">rate_review</span>
             </div>
             <div>
-              <h1 className="font-headline text-lg sm:text-xl font-bold text-purple-950 tracking-tight">
-                Submit Shoe Review
+              <h1 className="font-headline text-lg font-bold text-purple-950 tracking-tight">
+                Write a Shoe Review
               </h1>
               <p className="text-xs text-purple-900/60 mt-0.5">
-                Share authentic feedback, wear rating, and up to 6 on-foot photos.
+                Share authentic fit feedback, wear rating, and on-foot photos.
               </p>
             </div>
           </div>
@@ -208,7 +221,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
           <button
             type="button"
             onClick={loadSamplePhotos}
-            className="self-start sm:self-auto px-3.5 py-1.8 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5122fe] text-xs font-semibold border border-purple-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5122fe] text-xs font-semibold border border-purple-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             title="Populate test data instantly"
           >
             <span className="material-symbols-outlined text-[15px] text-[#5122fe]">auto_fix_high</span>
@@ -217,10 +230,10 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
         </div>
 
         {/* Clean Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-5 text-xs sm:text-sm">
+        <form onSubmit={handleSubmit} className="space-y-4.5 text-xs sm:text-sm">
           
-          {/* 1. Shoe Model Dropdown Selection */}
-          <div className="space-y-1.5">
+          {/* 1. Shoe Model Dropdown */}
+          <div className="space-y-1">
             <label className="block text-xs font-bold text-purple-950">
               Select Shoe Model <span className="text-rose-500">*</span>
             </label>
@@ -231,7 +244,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                   const prod = SHOE_PRODUCTS.find(p => p.sku === e.target.value);
                   if (prod) setSelectedProduct(prod);
                 }}
-                className="w-full h-11 px-3.5 pr-10 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 font-medium focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
+                className="w-full h-10.5 px-3.5 pr-10 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 font-medium focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
               >
                 {SHOE_PRODUCTS.map((prod) => (
                   <option key={prod.sku} value={prod.sku}>
@@ -246,7 +259,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
           </div>
 
           {/* 2. Star Rating */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="block text-xs font-bold text-purple-950">
               Overall Rating <span className="text-rose-500">*</span>
             </label>
@@ -263,21 +276,21 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                       onClick={() => setRating(star)}
                       className="focus:outline-none transition-transform hover:scale-120 cursor-pointer p-0.5"
                     >
-                      <span className={`material-symbols-outlined text-[26px] ${isFilled ? 'material-symbols-filled text-amber-400' : 'text-purple-200'}`}>
+                      <span className={`material-symbols-outlined text-[24px] ${isFilled ? 'material-symbols-filled text-amber-400' : 'text-purple-200'}`}>
                         star
                       </span>
                     </button>
                   );
                 })}
               </div>
-              <span className="text-xs font-semibold text-purple-900 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
+              <span className="text-xs font-semibold text-purple-900 bg-purple-50 px-2.5 py-0.8 rounded-lg border border-purple-200">
                 {getRatingLabel(hoverRating || rating)}
               </span>
             </div>
           </div>
 
           {/* 3. Review Title */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="block text-xs font-bold text-purple-950">
               Review Title <span className="text-rose-500">*</span>
             </label>
@@ -287,18 +300,18 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Incredibly comfortable with great arch support"
-              className="w-full h-10.5 px-3.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all placeholder:text-purple-300"
+              className="w-full h-10 px-3.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all placeholder:text-purple-300"
             />
           </div>
 
           {/* 4. Written Feedback */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="block text-xs font-bold text-purple-950">
               Written Feedback <span className="text-rose-500">*</span>
             </label>
             <textarea
               required
-              rows={4}
+              rows={3}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Describe ground feel, cushioning rebound, toe-box width, and outsole durability across surfaces..."
@@ -307,7 +320,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
           </div>
 
           {/* 5. Clean Image Upload Gallery (Up to 6 photos) */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-purple-950 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[17px] text-[#5122fe]">photo_camera</span>
@@ -316,12 +329,12 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
               <span className="text-[11px] text-purple-400">Up to 6 images</span>
             </div>
 
-            {/* Photo Row & Upload Button */}
-            <div className="flex flex-wrap items-center gap-2.5 p-3 rounded-2xl bg-purple-50/30 border border-purple-100">
+            {/* Photo Thumbnails Row */}
+            <div className="flex flex-wrap items-center gap-2.5 p-2.5 rounded-2xl bg-purple-50/30 border border-purple-100">
               {photos.map((imgUrl, index) => (
                 <div 
                   key={index} 
-                  className="relative group w-20 h-20 sm:w-22 sm:h-22 rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-xs shrink-0"
+                  className="relative group w-18 h-18 rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-xs shrink-0"
                 >
                   <img
                     src={imgUrl}
@@ -331,22 +344,22 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                   <button
                     type="button"
                     onClick={() => removePhoto(index)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-xs cursor-pointer"
+                    className="absolute top-1 right-1 w-4.5 h-4.5 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-xs cursor-pointer"
                     title="Remove photo"
                   >
-                    <span className="material-symbols-outlined text-[12px]">close</span>
+                    <span className="material-symbols-outlined text-[11px]">close</span>
                   </button>
-                  <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 py-0.2 rounded font-mono font-medium">
+                  <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] px-1 py-0.2 rounded font-mono font-medium">
                     #{index + 1}
                   </span>
                 </div>
               ))}
 
-              {/* Upload Action Tile */}
+              {/* Upload Tile */}
               {photos.length < 6 && (
-                <label className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl border-2 border-dashed border-purple-300 hover:border-[#5122fe] bg-white hover:bg-purple-50/60 flex flex-col items-center justify-center text-purple-500 hover:text-[#5122fe] cursor-pointer transition-all p-1 text-center group shrink-0">
-                  <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform text-[#5122fe]">add_a_photo</span>
-                  <span className="text-[10px] font-bold mt-0.5 text-purple-950">Add Photo</span>
+                <label className="w-18 h-18 rounded-xl border-2 border-dashed border-purple-300 hover:border-[#5122fe] bg-white hover:bg-purple-50/60 flex flex-col items-center justify-center text-purple-500 hover:text-[#5122fe] cursor-pointer transition-all p-1 text-center group shrink-0">
+                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform text-[#5122fe]">add_a_photo</span>
+                  <span className="text-[9px] font-bold mt-0.5 text-purple-950">Add Photo</span>
                   <span className="text-[8px] text-purple-400">{photos.length}/6</span>
                   <input
                     type="file"
@@ -361,7 +374,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
           </div>
 
           {/* 6. Fit & Feel Tags */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="block text-xs font-bold text-purple-950">
               Fit & Feel Tags
             </label>
@@ -373,7 +386,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    className={`px-2.5 py-0.8 rounded-full text-xs font-medium transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#5122fe] text-white shadow-xs'
                         : 'bg-purple-50 text-purple-900/80 hover:bg-purple-100 border border-purple-200/80'
@@ -386,8 +399,8 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
             </div>
           </div>
 
-          {/* 7. Customer Info & Verification */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3 border-t border-purple-100">
+          {/* 7. Customer Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-purple-100">
             <div>
               <label className="block text-xs font-bold text-purple-950 mb-1">
                 Your Name <span className="text-rose-500">*</span>
@@ -398,7 +411,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Marcus Vance"
-                className="w-full h-10 px-3.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
+                className="w-full h-9.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
               />
             </div>
 
@@ -412,7 +425,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 placeholder="marcus@sneakers.com"
-                className="w-full h-10 px-3.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
+                className="w-full h-9.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all"
               />
             </div>
           </div>
@@ -424,7 +437,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
               <select
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
-                className="h-8 px-2.5 rounded-xl bg-purple-50/60 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-[#5122fe] font-medium cursor-pointer"
+                className="h-7.5 px-2.5 rounded-xl bg-purple-50/60 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-[#5122fe] font-medium cursor-pointer"
               >
                 <option value="Direct Web">Direct Web</option>
                 <option value="Nike SNKRS App">Nike SNKRS App</option>
@@ -434,7 +447,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
               </select>
             </div>
 
-            <div className="flex items-center gap-4 text-xs font-medium text-purple-950">
+            <div className="flex items-center gap-3 text-xs font-medium text-purple-950">
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
@@ -442,7 +455,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                   onChange={(e) => setRecommend(e.target.checked)}
                   className="w-4 h-4 rounded text-[#5122fe] accent-[#5122fe]"
                 />
-                <span>I recommend this shoe</span>
+                <span>Recommends</span>
               </label>
 
               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -458,11 +471,11 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
           </div>
 
           {/* Form Actions Footer */}
-          <div className="pt-4 flex items-center justify-between gap-3 border-t border-purple-100">
+          <div className="pt-3 flex items-center justify-between gap-3 border-t border-purple-100">
             <button
               type="button"
               onClick={resetForm}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
             >
               Clear Form
             </button>
@@ -470,7 +483,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2.8 rounded-xl bg-gradient-to-r from-[#5122fe] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5122fe]/25 hover:shadow-lg hover:shadow-[#5122fe]/40 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-98 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5122fe] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5122fe]/25 hover:shadow-lg hover:shadow-[#5122fe]/40 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-98 cursor-pointer"
             >
               {submitting ? (
                 <>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import CustomerReviewsHub from './pages/CustomerReviewsHub';
-import SubmitReview from './pages/SubmitReview';
 import AdminModerationQueue from './pages/AdminModerationQueue';
 import AnalyticsInsights from './pages/AnalyticsInsights';
 import AutoApprovalModal from './components/AutoApprovalModal';
@@ -51,18 +50,8 @@ export default function App() {
       <main className="flex-1 pt-24 sm:pt-28 pb-12 w-full">
         {activeTab === 'hub' && (
           <CustomerReviewsHub
-            onNavigateWrite={() => setActiveTab('submit')}
             showToast={showToast}
             searchQuery={searchQuery}
-          />
-        )}
-
-        {activeTab === 'submit' && (
-          <SubmitReview
-            onReviewSubmitted={() => {
-              refreshPendingCount();
-            }}
-            showToast={showToast}
           />
         )}
 

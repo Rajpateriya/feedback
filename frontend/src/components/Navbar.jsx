@@ -6,7 +6,6 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
 
   const navItems = [
     { id: 'hub', label: 'Feed', icon: 'forum' },
-    { id: 'submit', label: 'Write Review', icon: 'rate_review' },
     { id: 'moderation', label: 'Moderation', icon: 'verified_user', badge: pendingCount },
     { id: 'analytics', label: 'Analytics', icon: 'insights' },
   ];

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
+import SubmitReview from './SubmitReview';
 
 export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQuery = '' }) {
   const [reviews, setReviews] = useState([]);
@@ -11,6 +12,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
   const [photosOnly, setPhotosOnly] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
   const [lightbox, setLightbox] = useState(null);
+  const [writeModalOpen, setWriteModalOpen] = useState(false);
 
   const effectiveSearch = searchQuery || localSearch;
 
@@ -74,6 +76,31 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       
+      {/* Upfront Community Wear-Test Callout with Resembling UI */}
+      <div className="bg-gradient-to-r from-purple-50/90 via-white to-purple-50/60 rounded-2xl border border-purple-200/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-md shadow-[#5122fe]/25 shrink-0">
+            <span className="material-symbols-outlined text-[20px]">rate_review</span>
+          </div>
+          <div>
+            <h2 className="font-headline text-sm sm:text-base font-bold text-purple-950">
+              Tested footwear recently? Add your feedback
+            </h2>
+            <p className="text-xs text-purple-900/60 mt-0.5">
+              Share real-world cushioning, fit ratings, and up to 6 on-foot wear photos with fellow sneakerheads.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setWriteModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#5122fe] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5122fe]/25 hover:shadow-lg hover:shadow-[#5122fe]/40 hover:-translate-y-0.5 transition-all cursor-pointer whitespace-nowrap active:scale-98"
+        >
+          <span className="material-symbols-outlined text-[17px]">add_a_photo</span>
+          <span>Write a Review</span>
+        </button>
+      </div>
+
       {/* Overview Card: Full Graceful Coverage across max-w-6xl */}
       <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)] p-5 sm:p-6 transition-all">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -107,8 +134,8 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
             <div className="flex items-center gap-2 pt-1">
               <button
-                onClick={onNavigateWrite}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white text-xs font-semibold shadow-sm shadow-purple-300 transition-all active:scale-98"
+                onClick={() => setWriteModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white text-xs font-semibold shadow-sm shadow-purple-300 transition-all active:scale-98 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">rate_review</span>
                 Write Review with Photos
@@ -534,6 +561,17 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
           </div>
         </div>
       )}
+
+      {/* Write Review Popup Modal */}
+      <SubmitReview
+        isOpen={writeModalOpen}
+        onClose={() => setWriteModalOpen(false)}
+        onReviewSubmitted={() => {
+          loadData();
+          showToast?.('Shoe wear-test review published live!', 'success');
+        }}
+        showToast={showToast}
+      />
     </div>
   );
 }
