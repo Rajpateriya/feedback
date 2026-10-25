@@ -36,8 +36,9 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
-      {/* Top Fixed Navigation */}
+    <div className="min-h-screen bg-[#fafafa] text-[#0f172a] flex flex-col selection:bg-indigo-100 selection:text-indigo-900 font-sans">
+      
+      {/* Floating Island Navigation */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -46,8 +47,8 @@ export default function App() {
         searchQuery={searchQuery}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 pt-14 w-full">
+      {/* Main Content Area with breathing room for floating navbar */}
+      <main className="flex-1 pt-16 sm:pt-20 pb-12 w-full">
         {activeTab === 'hub' && (
           <CustomerReviewsHub
             onNavigateWrite={() => setActiveTab('submit')}

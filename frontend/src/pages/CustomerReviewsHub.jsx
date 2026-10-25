@@ -43,7 +43,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
     try {
       const updated = await api.voteReview(id, voteType);
       setReviews(prev => prev.map(r => r.id === id ? updated : r));
-      showToast?.(`Thank you! Your feedback has been recorded.`, 'success');
+      showToast?.(`Feedback recorded`, 'success');
     } catch (err) {
       showToast?.('Could not record vote', 'error');
     }
@@ -57,42 +57,42 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `reviews_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `reviews_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast?.('Exported reviews CSV successfully!', 'success');
+    showToast?.('Exported reviews CSV', 'success');
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 space-y-4">
       
-      {/* Overview & Summary Card - Clean, Proportional SaaS Style */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5 sm:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      {/* Compact Overview Card */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 sm:p-6 transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           
-          {/* Average Rating Column */}
-          <div className="lg:col-span-4 flex flex-col justify-center space-y-3 lg:pr-6 lg:border-r border-slate-200/80">
+          {/* Left Rating Block */}
+          <div className="flex flex-col space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                Customer Feedback
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50/80 px-2 py-0.5 rounded-full border border-indigo-100">
+                Customer Ratings
               </span>
-              <span className="text-[11px] text-slate-500">Live Aggregate</span>
+              <span className="text-[11px] text-slate-400">&bull; Live Stream</span>
             </div>
 
             <div className="flex items-baseline gap-3">
-              <span className="font-headline text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-                {analytics?.average_rating ? analytics.average_rating.toFixed(1) : '4.8'}
+              <span className="font-headline text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                {analytics?.average_rating ? analytics.average_rating.toFixed(1) : '3.8'}
               </span>
               <div className="flex flex-col">
-                <div className="flex items-center text-amber-500">
+                <div className="flex items-center text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star} className="material-symbols-outlined text-[18px] material-symbols-filled text-amber-400">
-                      {star <= Math.round(analytics?.average_rating || 5) ? 'star' : 'star_border'}
+                    <span key={star} className="material-symbols-outlined text-[17px] material-symbols-filled">
+                      {star <= Math.round(analytics?.average_rating || 4) ? 'star' : 'star_border'}
                     </span>
                   ))}
                 </div>
-                <span className="text-xs text-slate-500 mt-0.5">
+                <span className="text-[11px] text-slate-500 mt-0.5">
                   Based on {analytics?.total_reviews || reviews.length} verified ratings
                 </span>
               </div>
@@ -101,38 +101,38 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={onNavigateWrite}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-2xs transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-xs transition-all active:scale-98"
               >
-                <span className="material-symbols-outlined text-[16px]">rate_review</span>
-                Write a Review
+                <span className="material-symbols-outlined text-[15px]">rate_review</span>
+                Write Review
               </button>
               <button
                 onClick={exportAudit}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 border border-slate-200 transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 border border-slate-200/80 transition-colors"
               >
-                <span className="material-symbols-outlined text-[16px] text-slate-500">download</span>
-                Export CSV
+                <span className="material-symbols-outlined text-[15px] text-slate-400">download</span>
+                Export
               </button>
             </div>
           </div>
 
-          {/* Star Distribution Progress Bars */}
-          <div className="lg:col-span-5 flex flex-col justify-center space-y-2 lg:px-4">
+          {/* Right Rating Distribution (Compact max-w-xs) */}
+          <div className="w-full sm:w-64 space-y-1.5 border-t sm:border-t-0 sm:border-l border-slate-100 pt-4 sm:pt-0 sm:pl-6">
             {[5, 4, 3, 2, 1].map((star) => {
               const key = `${star}_star`;
               const data = analytics?.rating_distribution?.[key] || { count: 0, percentage: 0 };
-              const barColor = star >= 4 ? 'bg-indigo-600' : star === 3 ? 'bg-indigo-400' : 'bg-rose-500';
+              const barColor = star >= 4 ? 'bg-indigo-600' : star === 3 ? 'bg-indigo-400' : 'bg-rose-400';
               return (
                 <button
                   key={star}
                   onClick={() => setSelectedRating(selectedRating === star ? null : star)}
-                  className={`flex items-center gap-2.5 text-xs transition-colors p-1 rounded-md hover:bg-slate-50 ${
-                    selectedRating === star ? 'bg-indigo-50/80 ring-1 ring-indigo-300 font-semibold text-indigo-900' : 'text-slate-600'
+                  className={`w-full flex items-center gap-2 text-xs transition-colors p-0.5 rounded-md hover:bg-slate-50 ${
+                    selectedRating === star ? 'font-semibold text-indigo-900' : 'text-slate-600'
                   }`}
                 >
-                  <span className="w-11 text-left flex items-center gap-1">
+                  <span className="w-6 text-left flex items-center gap-0.5 text-[11px]">
                     <span>{star}</span>
-                    <span className="material-symbols-outlined text-[13px] material-symbols-filled text-amber-400">star</span>
+                    <span className="material-symbols-outlined text-[11px] material-symbols-filled text-amber-400">star</span>
                   </span>
                   <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                     <div
@@ -140,45 +140,39 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
                       style={{ width: `${data.percentage}%` }}
                     ></div>
                   </div>
-                  <span className="w-9 text-right font-medium text-slate-500 text-[11px]">{data.percentage}%</span>
+                  <span className="w-8 text-right font-medium text-slate-400 text-[10px]">{data.percentage}%</span>
                 </button>
               );
             })}
           </div>
+        </div>
 
-          {/* Key Signals */}
-          <div className="lg:col-span-3 flex flex-col justify-center space-y-2.5 lg:pl-6 lg:border-l border-slate-200/80">
-            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200/70">
-              <div className="flex items-center gap-1.5 text-slate-800 text-xs font-semibold mb-0.5">
-                <span className="material-symbols-outlined text-[15px] text-emerald-600 material-symbols-filled">verified</span>
-                Verified Orders
-              </div>
-              <p className="text-[11px] text-slate-500 leading-normal">
-                {analytics?.verified_percentage || 98}% of ratings tied to verified enterprise transactions.
-              </p>
-            </div>
-            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200/70">
-              <div className="flex items-center gap-1.5 text-slate-800 text-xs font-semibold mb-0.5">
-                <span className="material-symbols-outlined text-[15px] text-indigo-600">shield_check</span>
-                Active SLA Engine
-              </div>
-              <p className="text-[11px] text-slate-500 leading-normal">
-                Real-time sentiment and toxicity inspection on all channel reviews.
-              </p>
-            </div>
+        {/* Micro Signals Strip */}
+        <div className="mt-5 pt-3.5 border-t border-slate-100/80 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px] text-emerald-600 material-symbols-filled">verified</span>
+            <span>{analytics?.verified_percentage || 85.7}% Verified Buyer Orders</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px] text-indigo-500">timer</span>
+            <span>{analytics?.median_sla_minutes || 4.2}m SLA Triage Turnaround</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px] text-slate-400">security</span>
+            <span>Algorithmic Trust Engine Active</span>
           </div>
         </div>
       </div>
 
-      {/* Filter and Sorting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+      {/* Compact Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200/70 shadow-2xs">
         
-        {/* Rating Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+        {/* Rating Pills */}
+        <div className="flex items-center gap-1 overflow-x-auto">
           <button
             onClick={() => setSelectedRating(null)}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
-              selectedRating === null ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+              selectedRating === null ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             All Ratings
@@ -187,22 +181,22 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             <button
               key={s}
               onClick={() => setSelectedRating(selectedRating === s ? null : s)}
-              className={`px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
-                selectedRating === s ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+              className={`px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-0.5 ${
+                selectedRating === s ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <span>{s}</span>
-              <span className="material-symbols-outlined text-[13px] material-symbols-filled text-amber-400">star</span>
+              <span className="material-symbols-outlined text-[11px] material-symbols-filled text-amber-400">star</span>
             </button>
           ))}
         </div>
 
-        {/* Channel & Sort Selectors */}
-        <div className="flex items-center gap-2">
+        {/* Channel & Sort */}
+        <div className="flex items-center gap-1.5">
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
-            className="h-8 px-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"
+            className="h-7 px-2 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-700 focus:outline-none focus:border-indigo-500"
           >
             <option value="">All Channels</option>
             <option value="Direct Web">Direct Web</option>
@@ -214,7 +208,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-8 px-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"
+            className="h-7 px-2 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-700 focus:outline-none focus:border-indigo-500"
           >
             <option value="recent">Most Recent</option>
             <option value="highest_rating">Highest Rating</option>
@@ -225,22 +219,22 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
       </div>
 
       {/* Reviews List */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {loading ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-            <span className="material-symbols-outlined text-indigo-600 text-3xl animate-spin">refresh</span>
-            <p className="text-xs text-slate-500 mt-2">Loading customer evaluations...</p>
+          <div className="text-center py-12 bg-white rounded-xl border border-slate-200/80">
+            <span className="material-symbols-outlined text-indigo-600 text-2xl animate-spin">refresh</span>
+            <p className="text-[11px] text-slate-400 mt-1">Loading customer evaluations...</p>
           </div>
         ) : reviews.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-slate-200 p-6">
-            <span className="material-symbols-outlined text-slate-300 text-4xl">inventory_2</span>
-            <h3 className="text-sm font-semibold text-slate-900 mt-2">No reviews match current filters</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Adjust your rating or channel filters to view customer feedback.
+          <div className="text-center py-12 bg-white rounded-xl border border-slate-200/80 p-5">
+            <span className="material-symbols-outlined text-slate-300 text-3xl">inventory_2</span>
+            <h3 className="text-xs font-semibold text-slate-800 mt-1.5">No reviews match current filters</h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Reset your filters to see all available feedback.
             </p>
             <button
               onClick={() => { setSelectedRating(null); setSelectedChannel(''); setLocalSearch(''); }}
-              className="mt-3 px-3 py-1.5 rounded-md bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700"
+              className="mt-2.5 px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800"
             >
               Reset Filters
             </button>
@@ -257,42 +251,42 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             return (
               <div
                 key={r.id}
-                className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors flex flex-col space-y-3"
+                className="bg-white rounded-xl p-4 border border-slate-200/70 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-slate-300 transition-colors flex flex-col space-y-2.5"
               >
                 {/* Header row: User, Rating, Channel */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                    <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-[11px] border border-slate-200/60">
                       {initials}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold text-slate-900">{r.customer_name}</span>
                         {r.verified_purchase && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
-                            <span className="material-symbols-outlined text-[12px] material-symbols-filled">verified</span>
-                            Verified Buyer
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
+                            <span className="material-symbols-outlined text-[11px] material-symbols-filled">verified</span>
+                            Verified
                           </span>
                         )}
-                        <span className="text-[11px] text-slate-400">&bull; {formattedDate}</span>
+                        <span className="text-[10px] text-slate-400">&bull; {formattedDate}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
                         <span className="font-medium text-slate-700">{r.product_name}</span>
-                        <span>&bull;</span>
-                        <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-1 rounded">{r.sku}</span>
+                        <span className="text-slate-300">&bull;</span>
+                        <span className="font-mono text-[9px] bg-slate-100 text-slate-500 px-1 rounded">{r.sku}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <div className="flex items-center text-amber-400">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className="material-symbols-outlined text-[15px] material-symbols-filled">
+                        <span key={star} className="material-symbols-outlined text-[13px] material-symbols-filled">
                           {star <= r.rating ? 'star' : 'star_border'}
                         </span>
                       ))}
                     </div>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-slate-50 text-slate-500 font-medium border border-slate-200">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-50 text-slate-500 font-medium border border-slate-200/60">
                       {r.channel}
                     </span>
                   </div>
@@ -300,7 +294,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
                 {/* Review Title & Body */}
                 <div className="space-y-1">
-                  <h3 className="font-headline font-bold text-sm text-slate-900 tracking-tight">
+                  <h3 className="font-headline font-bold text-xs sm:text-sm text-slate-900">
                     {r.title}
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
@@ -310,45 +304,45 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
                 {/* Feature Tags & Recommendation */}
                 {r.tags && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <div className="flex flex-wrap items-center gap-1 pt-0.5">
                     {r.tags.split(',').map((tag, i) => (
                       <span
                         key={i}
-                        className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                        className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
                       >
                         {tag.trim()}
                       </span>
                     ))}
                     {r.recommend && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px] material-symbols-filled">thumb_up</span>
-                        Recommends product
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-0.5">
+                        <span className="material-symbols-outlined text-[10px] material-symbols-filled">thumb_up</span>
+                        Recommends
                       </span>
                     )}
                   </div>
                 )}
 
                 {/* Footer with Helpful voting */}
-                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px]">Helpful?</span>
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-slate-400">Helpful?</span>
                     <button
                       onClick={() => handleVote(r.id, 'helpful')}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] border border-slate-200 transition-colors"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] border border-slate-200/80 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-[13px]">thumb_up</span>
+                      <span className="material-symbols-outlined text-[11px]">thumb_up</span>
                       <span>Yes ({r.helpful_count})</span>
                     </button>
                     <button
                       onClick={() => handleVote(r.id, 'unhelpful')}
-                      className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-500 text-[11px] border border-slate-200 transition-colors"
+                      className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-400 text-[10px] border border-slate-200/80 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-[13px]">thumb_down</span>
+                      <span className="material-symbols-outlined text-[11px]">thumb_down</span>
                     </button>
                   </div>
 
-                  <span className="text-[10px] font-medium text-slate-400">
-                    AI Trust: {Math.round(r.sentiment_score * 100)}%
+                  <span className="text-[9px] font-medium text-slate-400">
+                    Confidence: {Math.round(r.sentiment_score * 100)}%
                   </span>
                 </div>
               </div>

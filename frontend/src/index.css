@@ -5,6 +5,11 @@
   --font-headline: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
