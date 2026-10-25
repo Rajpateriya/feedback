@@ -31,7 +31,36 @@ class Review(Base):
     unhelpful_count = Column(Integer, default=0)
     tags = Column(String(255), default="")  # Comma-separated: "Audio Quality, Battery"
     image_url = Column(String(500), nullable=True)
-    
+    images_json = Column(Text, nullable=True)  # JSON array storing up to 6 photo URLs/base64 strings
+
+    @property
+    def images(self):
+        import json
+        if self.images_json:
+            try:
+                loaded = json.loads(self.images_json)
+                if isinstance(loaded, list):
+                    return loaded
+            except Exception:
+                pass
+        if self.image_url:
+            return [self.image_url]
+        return []
+
+    @images.setter
+    def images(self, value):
+        import json
+        if isinstance(value, list):
+            self.images_json = json.dumps(value)
+            if value and len(value) > 0 and not self.image_url:
+                self.image_url = value[0]
+        elif isinstance(value, str):
+            self.images_json = json.dumps([value])
+            if not self.image_url:
+                self.image_url = value
+        else:
+            self.images_json = "[]"
+
     # Moderation SLA & Audit Trail
     moderation_note = Column(Text, nullable=True)
     moderated_by = Column(String(100), nullable=True)

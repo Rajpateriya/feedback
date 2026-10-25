@@ -14,40 +14,49 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
   return (
     <>
       {/* Floating Island Navbar */}
-      <header className="fixed top-3 sm:top-4 inset-x-0 mx-auto max-w-4xl w-[calc(100%-1.5rem)] z-50">
-        <div className="bg-white/85 backdrop-blur-xl border border-slate-200/70 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] rounded-full px-3.5 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-4 transition-all">
+      <header className="fixed top-3 sm:top-4 inset-x-0 mx-auto max-w-6xl w-[calc(100%-1.5rem)] sm:w-[calc(100%-2.5rem)] z-50">
+        <div className="bg-white/90 backdrop-blur-xl border border-purple-200/80 shadow-[0_8px_30px_rgba(147,51,234,0.08)] rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
           
           {/* Logo */}
           <button 
             onClick={() => setActiveTab('hub')}
-            className="flex items-center gap-2 select-none text-left focus:outline-none pl-1"
+            className="flex items-center gap-2 select-none text-left focus:outline-none pl-1 group"
           >
-            <div className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-white shadow-xs">
-              <span className="material-symbols-outlined text-[15px]">rate_review</span>
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-700 to-violet-600 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[16px]">rate_review</span>
             </div>
-            <span className="font-headline font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
-              Pulse<span className="text-indigo-600">Review</span>
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-headline font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
+                Pulse<span className="text-purple-600 font-extrabold">Review</span>
+              </span>
+              <span className="hidden sm:inline-block text-[9px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded-full border border-purple-200">
+                Shoe Hub
+              </span>
+            </div>
           </button>
 
           {/* Floating Navigation Pill Group */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-0.5 rounded-full border border-slate-200/50">
+          <nav className="hidden md:flex items-center gap-1 bg-purple-50/70 p-1 rounded-full border border-purple-200/60">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  className={`relative px-3.5 py-1.2 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
                     isActive 
-                      ? 'bg-white text-slate-900 font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]' 
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold shadow-xs' 
+                      : 'text-purple-900/70 hover:text-purple-900 hover:bg-white/60'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[14px] text-slate-500">{item.icon}</span>
+                  <span className={`material-symbols-outlined text-[14px] ${isActive ? 'text-white' : 'text-purple-500'}`}>
+                    {item.icon}
+                  </span>
                   <span>{item.label}</span>
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                    <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                      isActive ? 'bg-white/20 text-white border border-white/30' : 'bg-purple-200/70 text-purple-800'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
@@ -68,16 +77,16 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
                     autoFocus
                     value={searchQuery}
                     onChange={(e) => onSearch(e.target.value)}
-                    placeholder="Search reviews..."
+                    placeholder="Search sneaker reviews..."
                     onBlur={() => !searchQuery && setSearchOpen(false)}
-                    className="w-36 sm:w-48 h-7 pl-7 pr-6 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all"
+                    className="w-36 sm:w-56 h-7.5 pl-7 pr-6 rounded-full bg-purple-50/80 border border-purple-200 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-purple-500 transition-all placeholder:text-purple-300"
                   />
-                  <span className="material-symbols-outlined absolute left-2 text-slate-400 text-[14px]">
+                  <span className="material-symbols-outlined absolute left-2 text-purple-400 text-[14px]">
                     search
                   </span>
                   <button
                     onClick={() => { onSearch(''); setSearchOpen(false); }}
-                    className="absolute right-2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 text-purple-400 hover:text-purple-600"
                   >
                     <span className="material-symbols-outlined text-[14px]">close</span>
                   </button>
@@ -85,8 +94,8 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-1.5 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                  title="Search reviews"
+                  className="p-1.5 rounded-full text-purple-700/80 hover:text-purple-900 hover:bg-purple-100/60 transition-colors"
+                  title="Search sneaker reviews"
                 >
                   <span className="material-symbols-outlined text-[17px]">search</span>
                 </button>
@@ -96,18 +105,18 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
             {/* Notification Badge */}
             <button
               onClick={() => setActiveTab('moderation')}
-              className="relative p-1.5 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="relative p-1.5 rounded-full text-purple-700/80 hover:text-purple-900 hover:bg-purple-100/60 transition-colors"
               title="Moderation Queue"
             >
               <span className="material-symbols-outlined text-[17px]">notifications</span>
               {pendingCount > 0 && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full ring-2 ring-white"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-purple-600 rounded-full ring-2 ring-white"></span>
               )}
             </button>
 
             {/* Moderator Avatar */}
             <div 
-              className="w-6 h-6 rounded-full bg-slate-800 text-white text-[10px] font-semibold flex items-center justify-center shadow-xs"
+              className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-800 to-violet-900 text-purple-100 text-[10px] font-bold flex items-center justify-center shadow-xs border border-purple-300/40"
               title="Eleanor Vance (Staff Moderator)"
             >
               EV
@@ -116,7 +125,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1 rounded-full text-slate-600 hover:bg-slate-100 ml-1"
+              className="md:hidden p-1 rounded-full text-purple-800 hover:bg-purple-100/60 ml-1"
               aria-label="Toggle menu"
             >
               <span className="material-symbols-outlined text-[20px]">
@@ -128,7 +137,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
 
         {/* Mobile Dropdown Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-2 bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-2.5 shadow-lg space-y-1 animate-in slide-in-from-top-2 duration-150">
+          <div className="md:hidden mt-2 bg-white/95 backdrop-blur-xl border border-purple-200/80 rounded-2xl p-2.5 shadow-lg space-y-1 animate-in slide-in-from-top-2 duration-150">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -136,10 +145,10 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
                   setActiveTab(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors ${
                   activeTab === item.id 
-                    ? 'bg-slate-900 text-white font-semibold' 
-                    : 'text-slate-600 hover:bg-slate-50'
+                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold' 
+                    : 'text-purple-900/80 hover:bg-purple-50'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -147,7 +156,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700">
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-white/20 text-white">
                     {item.badge}
                   </span>
                 )}

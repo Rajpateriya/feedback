@@ -15,6 +15,7 @@ class ReviewBase(BaseModel):
     verified_purchase: Optional[bool] = True
     tags: Optional[str] = ""
     image_url: Optional[str] = None
+    images: Optional[List[str]] = Field(default_factory=list)
 
 class ReviewCreate(ReviewBase):
     pass

@@ -86,7 +86,7 @@ def submit_review(review_in: ReviewCreate, db: Session = Depends(get_db)):
         recommend=review_in.recommend,
         verified_purchase=review_in.verified_purchase,
         tags=review_in.tags or "",
-        image_url=review_in.image_url,
+        image_url=review_in.image_url or (review_in.images[0] if review_in.images else None),
         status=suggested_status,
         sentiment_label=sentiment_label,
         sentiment_score=sentiment_score,
@@ -96,6 +96,12 @@ def submit_review(review_in: ReviewCreate, db: Session = Depends(get_db)):
         unhelpful_count=0,
         moderated_by="Auto-Approval Engine" if suggested_status == "approved" else None
     )
+    
+    # Store up to 6 photos in images property
+    if review_in.images:
+        new_review.images = review_in.images[:6]
+    elif review_in.image_url:
+        new_review.images = [review_in.image_url]
     
     db.add(new_review)
     db.commit()
