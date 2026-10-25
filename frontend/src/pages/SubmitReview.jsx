@@ -2,17 +2,39 @@ import React, { useState } from 'react';
 import { api } from '../api/client';
 
 const SHOE_PRODUCTS = [
-  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning' },
-  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run' },
-  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic' },
-  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle' },
-  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Max Road Cushion' },
-  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail / All-Terrain' },
+  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning', icon: 'air' },
+  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run', icon: 'bolt' },
+  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic', icon: 'sports_basketball' },
+  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle', icon: 'style' },
+  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Max Road Cushion', icon: 'cloud' },
+  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail / All-Terrain', icon: 'terrain' },
 ];
 
 const SHOE_TAGS = [
-  'Cushioning & Bounce', 'True to Size', 'Arch Support', 'Breathability',
-  'Ankle Lockdown', 'Continental Grip', 'Wide Foot Friendly', 'Durable Outsole'
+  { label: 'Cushioning & Bounce', icon: 'bolt' },
+  { label: 'True to Size', icon: 'straighten' },
+  { label: 'Arch Support', icon: 'accessibility_new' },
+  { label: 'Breathability', icon: 'air' },
+  { label: 'Ankle Lockdown', icon: 'lock' },
+  { label: 'Continental Grip', icon: 'terrain' },
+  { label: 'Wide Foot Friendly', icon: 'width_normal' },
+  { label: 'Durable Outsole', icon: 'verified' },
+];
+
+const SLOT_LABELS = [
+  'Lateral Profile',
+  'Outsole Tread',
+  'Heel Cushion',
+  'Toe-Box Width',
+  'On-Foot Action',
+  'Insole & Box'
+];
+
+const SUGGESTED_HEADLINES = [
+  'Plush cushioning for 10K+ runs',
+  'Runs true to size with snug ankle lockdown',
+  'Exceptional grip across wet road & trails',
+  'Best daily lifestyle sneaker of the season'
 ];
 
 const SAMPLE_SHOE_PHOTOS = [
@@ -40,20 +62,33 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
 
-  const toggleTag = (tag) => {
+  // Review Completeness / Strength Calculation
+  const calculateStrength = () => {
+    let score = 0;
+    if (selectedProduct) score += 20;
+    if (rating > 0) score += 20;
+    if (photos.length > 0) score += Math.min(20, photos.length * 4);
+    if (title.trim().length >= 8) score += 20;
+    if (body.trim().length >= 20 && customerName.trim() && customerEmail.trim()) score += 20;
+    return Math.min(100, score);
+  };
+
+  const reviewStrength = calculateStrength();
+
+  const toggleTag = (tagLabel) => {
     setSelectedTags(prev => 
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+      prev.includes(tagLabel) ? prev.filter(t => t !== tagLabel) : [...prev, tagLabel]
     );
   };
 
-  const getRatingLabel = (val) => {
+  const getRatingFeedback = (val) => {
     switch (val) {
-      case 5: return '5★ - Exceptional Cushion';
-      case 4: return '4★ - Highly Satisfied';
-      case 3: return '3★ - Average Comfort';
-      case 2: return '2★ - Below Expectations';
-      case 1: return '1★ - Unsatisfactory';
-      default: return 'Select Rating';
+      case 5: return { label: '5.0 - Exceptional Cushion & Energy Rebound', emoji: '🔥', tone: 'text-amber-500' };
+      case 4: return { label: '4.0 - Solid Daily Training Support', emoji: '✨', tone: 'text-purple-600' };
+      case 3: return { label: '3.0 - Balanced Standard Road Feel', emoji: '⚡', tone: 'text-blue-500' };
+      case 2: return { label: '2.0 - Stiff Cushioning / High Impact', emoji: '⚠️', tone: 'text-amber-600' };
+      case 1: return { label: '1.0 - Poor Fit & Inadequate Cushion', emoji: '🛑', tone: 'text-rose-600' };
+      default: return { label: 'Select Rating', emoji: '⭐', tone: 'text-purple-400' };
     }
   };
 
@@ -86,7 +121,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
     });
 
     e.target.value = '';
-    showToast?.(`Photo(s) added (${Math.min(6, photos.length + filesToProcess.length)}/6)`, 'success');
+    showToast?.(`Added photo(s) (${Math.min(6, photos.length + filesToProcess.length)}/6)`, 'success');
   };
 
   const removePhoto = (indexToRemove) => {
@@ -95,7 +130,11 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
 
   const loadSamplePhotos = () => {
     setPhotos(SAMPLE_SHOE_PHOTOS);
-    showToast?.('Loaded 6 sample sneaker photos!', 'success');
+    if (!title) setTitle('Next level heel recoil for marathon prep and daily wear');
+    if (!body) setBody('Midsole cushion rebound is outstanding over 25km. Outsole continental rubber grips wet asphalt without slipping. Lockdown through the midfoot is snug with no heel slippage.');
+    if (!customerName) setCustomerName('Marcus Vance');
+    if (!customerEmail) setCustomerEmail('marcus@sneakers.com');
+    showToast?.('Populated 6 verified sample sneaker photos & review data!', 'success');
   };
 
   const handleSubmit = async (e) => {
@@ -145,130 +184,113 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
     setSubmittedResult(null);
   };
 
+  const ratingInfo = getRatingFeedback(hoverRating || rating);
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       
-      {/* Result Confirmation Toast Banner */}
+      {/* Result Confirmation Banner */}
       {submittedResult && (
-        <div className="mb-3 p-3.5 rounded-2xl bg-white border border-purple-200/90 shadow-[0_4px_20px_rgba(81,34,254,0.08)] animate-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between gap-3">
+        <div className="mb-4 p-4 rounded-2xl bg-white border border-purple-200 shadow-[0_4px_24px_rgba(81,34,254,0.08)] animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-600 text-white flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px]">verified</span>
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-sm shadow-[#5122fe]/30">
+                <span className="material-symbols-outlined text-[20px]">verified</span>
               </div>
               <div>
-                <h3 className="text-xs sm:text-sm font-bold text-purple-950">
-                  {submittedResult.status === 'approved' ? 'Shoe Review Verified & Published!' : 'Review Queued for Verification'}
+                <h3 className="text-sm font-bold text-purple-950">
+                  {submittedResult.status === 'approved' ? 'Footwear Wear-Test Verified & Live!' : 'Review Queued for Verification'}
                 </h3>
-                <p className="text-[11px] text-purple-900/60 mt-0.5">
-                  AI Trust: <strong>{(submittedResult.sentiment_score * 100).toFixed(0)}%</strong> &bull; Photos Attached: <strong>{(submittedResult.images || []).length}</strong>
+                <p className="text-xs text-purple-900/60 mt-0.5">
+                  AI Sentiment Score: <strong>{(submittedResult.sentiment_score * 100).toFixed(0)}%</strong> &bull; Attached Photos: <strong>{(submittedResult.images || []).length} / 6</strong>
                 </p>
               </div>
             </div>
 
             <button
               onClick={resetForm}
-              className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200"
+              className="self-start sm:self-auto text-xs font-bold px-4 py-2 rounded-xl bg-[#f5f2ff] text-[#5122fe] hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer"
             >
-              Write Another
+              + Submit Another Review
             </button>
           </div>
         </div>
       )}
 
-      {/* Sneakerhead Wear-Test Hero Banner - Precision Color Coded to #5122fe */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#170460] via-[#2f0e9e] to-[#5122fe] text-white p-5 sm:p-6 mb-4 shadow-[0_14px_36px_rgba(81,34,254,0.22)] border border-[#7b4eff]/30 ring-1 ring-white/10">
-        {/* Ambient atmospheric glow elements aligned with #5122fe theme */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#5122fe]/40 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#7b4eff]/30 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20 backdrop-blur-xs flex items-center gap-1">
-                <span className="material-symbols-outlined text-[13px] text-[#c1aeff]">local_fire_department</span>
-                Community Footwear Lab
-              </span>
-              <span className="text-purple-200/80 text-xs hidden sm:inline">&bull; Wear-Test Verification</span>
+      {/* Main Form Card: Direct & Elevated Header without separate banner */}
+      <div className="bg-white rounded-3xl border border-purple-200/90 shadow-[0_8px_32px_rgba(81,34,254,0.07)] p-4 sm:p-6 lg:p-7 transition-all">
+        
+        {/* Integrated Form Hero Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-4 border-b border-purple-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-md shadow-[#5122fe]/25 shrink-0">
+              <span className="material-symbols-outlined text-[20px]">rate_review</span>
             </div>
-            <h2 className="font-headline text-lg sm:text-2xl font-extrabold tracking-tight text-white">
-              Submit Shoe Wear-Test Review & Photos
-            </h2>
-            <p className="text-xs sm:text-sm text-purple-100/90 mt-1 max-w-2xl leading-relaxed">
-              Share real-world feedback on sneaker cushion rebound, outsole wear, and up to 6 on-foot photos to help fellow runners and sneakerheads.
-            </p>
-
-            {/* Footwear Wear-Test Feature Pills */}
-            <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-white/95">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
-                <span className="material-symbols-outlined text-[13px] text-[#c1aeff]">steps</span>
-                6 Verified Silhouettes
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
-                <span className="material-symbols-outlined text-[13px] text-emerald-300">add_a_photo</span>
-                6 High-Res Photo Slots
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
-                <span className="material-symbols-outlined text-[13px] text-amber-300">verified</span>
-                Verified Buyer Badges
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
-                <span className="material-symbols-outlined text-[13px] text-[#dbd0ff]">shield_with_heart</span>
-                Automated Moderation
-              </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-headline text-base sm:text-lg font-extrabold text-purple-950 tracking-tight">
+                  Submit Footwear Wear-Test Review
+                </h1>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#f5f2ff] text-[#5122fe] border border-purple-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  Community Lab
+                </span>
+              </div>
+              <p className="text-xs text-purple-900/60 mt-0.5">
+                Share authentic on-foot wear telemetry, cushioning rebound, and up to 6 photos with fellow sneakerheads.
+              </p>
             </div>
           </div>
 
-          {/* Quick Action Badges */}
-          <div className="flex flex-row md:flex-col items-start md:items-end gap-2.5 self-start md:self-auto shrink-0">
+          {/* Header Action Tools: Sample Loader & Live Review Strength Meter */}
+          <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
             <button
               type="button"
               onClick={loadSamplePhotos}
-              className="px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 text-[#5122fe] text-xs font-bold shadow-lg shadow-[#170460]/20 transition-all flex items-center gap-1.5 active:scale-98 border border-white cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-[#f5f2ff] hover:bg-purple-100 text-[#5122fe] text-xs font-bold border border-purple-200/90 transition-all flex items-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-98 cursor-pointer"
+              title="Populate 6 sneaker photos and review instantly"
             >
-              <span className="material-symbols-outlined text-[16px] text-[#5122fe]">bolt</span>
+              <span className="material-symbols-outlined text-[15px] text-[#5122fe]">bolt</span>
               <span>⚡ Load 6 Sample Photos</span>
             </button>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#170460]/60 border border-white/15 backdrop-blur-xs text-white">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-[10px] uppercase tracking-wider text-purple-200 font-semibold">Photo Capacity:</span>
-              <span className="text-xs font-bold text-emerald-300">Up to 6</span>
+            {/* Interactive Quality Meter */}
+            <div className="hidden sm:flex flex-col items-end px-3 py-1.5 rounded-xl bg-purple-50/60 border border-purple-100">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-[9px] uppercase tracking-wider font-semibold text-purple-700">Review Strength</span>
+                <span className={`text-[10px] font-extrabold ${reviewStrength >= 80 ? 'text-emerald-600' : 'text-[#5122fe]'}`}>
+                  {reviewStrength}%
+                </span>
+              </div>
+              <div className="w-24 bg-purple-200/70 rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-[#5122fe] via-[#7b4eff] to-emerald-400 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${reviewStrength}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Broad Card: Full Width max-w-6xl */}
-      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)] p-4 sm:p-5 lg:p-6 transition-all">
-        
-        {/* Top Header Strip */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-purple-100">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full border border-purple-200">
-              Review Details Form
-            </span>
-            <span className="text-[11px] text-purple-400">&bull; All fields marked with * are required</span>
-          </div>
-
-          <span className="text-[11px] text-purple-900/50 font-medium">
-            Step 1 of 1
-          </span>
-        </div>
-
-        {/* Form Body: Balanced 2-Column Responsive Layout */}
+        {/* 2-Column Balanced Responsive Form */}
         <form onSubmit={handleSubmit} className="text-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            {/* LEFT COLUMN: Shoe Selector, Rating, Tags, Customer Info (5 cols on lg) */}
-            <div className="lg:col-span-5 space-y-3">
+            {/* LEFT COLUMN: Shoe Selector, Interactive Rating, Fit Tags, Customer Data (5 cols) */}
+            <div className="lg:col-span-5 space-y-3.5">
               
-              {/* 1. Footwear Silhouette Selector */}
+              {/* 1. Footwear Model Selector */}
               <div>
-                <label className="block text-[11px] font-bold text-purple-950 mb-1">
-                  1. Select Shoe Model <span className="text-rose-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-purple-950 flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-[#f5f2ff] text-[#5122fe] flex items-center justify-center text-[10px] font-bold">1</span>
+                    <span>Select Footwear Model</span>
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-purple-900/50">6 Available</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
                   {SHOE_PRODUCTS.map((prod) => {
                     const isSelected = selectedProduct.sku === prod.sku;
                     return (
@@ -276,161 +298,192 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                         key={prod.sku}
                         type="button"
                         onClick={() => setSelectedProduct(prod)}
-                        className={`p-2 rounded-xl text-left border transition-all flex flex-col justify-between ${
+                        className={`p-2.5 rounded-2xl text-left border transition-all flex flex-col justify-between relative group cursor-pointer ${
                           isSelected
-                            ? 'bg-purple-50/90 border-purple-600 ring-1 ring-purple-600/40 shadow-2xs'
-                            : 'bg-white border-purple-100 hover:border-purple-300'
+                            ? 'bg-[#f5f2ff] border-[#5122fe] ring-2 ring-[#5122fe]/25 shadow-sm'
+                            : 'bg-white border-purple-100 hover:border-[#5122fe]/40 hover:bg-purple-50/40 hover:-translate-y-0.5'
                         }`}
                       >
+                        {isSelected && (
+                          <span className="absolute top-2 right-2 text-[#5122fe] material-symbols-outlined text-[15px] material-symbols-filled">
+                            check_circle
+                          </span>
+                        )}
                         <div>
-                          <div className="text-[8px] font-bold text-purple-500 uppercase tracking-tight">{prod.category}</div>
-                          <div className="font-bold text-[11px] text-purple-950 mt-0.5 leading-snug">{prod.name}</div>
+                          <div className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px] text-purple-500">{prod.icon}</span>
+                            <span className="text-[8px] font-extrabold uppercase tracking-tight text-purple-600">{prod.category}</span>
+                          </div>
+                          <div className="font-bold text-[11px] text-purple-950 mt-1 leading-snug">{prod.name}</div>
                         </div>
-                        <div className="font-mono text-[9px] text-purple-600 mt-1">{prod.sku}</div>
+                        <div className="font-mono text-[9px] text-purple-500/80 mt-1.5">{prod.sku}</div>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 2. Rating */}
-              <div className="p-2.5 rounded-xl bg-purple-50/50 border border-purple-100 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 text-amber-400">
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    const isFilled = (hoverRating || rating) >= star;
-                    return (
-                      <button
-                        key={star}
-                        type="button"
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => setRating(star)}
-                        className="focus:outline-none transition-transform hover:scale-115"
-                      >
-                        <span className={`material-symbols-outlined text-[20px] ${isFilled ? 'material-symbols-filled' : ''}`}>
-                          {isFilled ? 'star' : 'star_border'}
-                        </span>
-                      </button>
-                    );
-                  })}
+              {/* 2. Interactive Star Rating */}
+              <div className="p-3 rounded-2xl bg-[#f5f2ff]/60 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-purple-900/70 mb-1">
+                    Cushioning & Wear Rating
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const isFilled = (hoverRating || rating) >= star;
+                      return (
+                        <button
+                          key={star}
+                          type="button"
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => setRating(star)}
+                          className="focus:outline-none transition-transform hover:scale-125 cursor-pointer"
+                          aria-label={`Rate ${star} stars`}
+                        >
+                          <span className={`material-symbols-outlined text-[24px] ${isFilled ? 'material-symbols-filled text-amber-400' : 'text-purple-200'}`}>
+                            star
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold text-purple-900 bg-white px-2 py-0.5 rounded-md border border-purple-200">
-                  {getRatingLabel(hoverRating || rating)}
-                </span>
+
+                <div className="self-start sm:self-auto px-2.5 py-1 rounded-xl bg-white border border-purple-200 shadow-2xs">
+                  <div className="text-[10px] font-bold flex items-center gap-1 text-purple-950">
+                    <span>{ratingInfo.emoji}</span>
+                    <span className="truncate max-w-[180px]">{ratingInfo.label}</span>
+                  </div>
+                </div>
               </div>
 
-              {/* 3. Shoe Attribute Tags */}
+              {/* 3. Shoe Fit & Feel Tags */}
               <div>
-                <label className="block text-[11px] font-bold text-purple-950 mb-1">
-                  Shoe Fit & Feel Tags
+                <label className="block text-[11px] font-bold text-purple-950 mb-1.5">
+                  Footwear Fit & Performance Tags
                 </label>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {SHOE_TAGS.map((tag) => {
-                    const isSelected = selectedTags.includes(tag);
+                    const isSelected = selectedTags.includes(tag.label);
                     return (
                       <button
-                        key={tag}
+                        key={tag.label}
                         type="button"
-                        onClick={() => toggleTag(tag)}
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-all ${
+                        onClick={() => toggleTag(tag.label)}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                           isSelected
-                            ? 'bg-purple-700 text-white shadow-2xs'
-                            : 'bg-purple-50 text-purple-800 border border-purple-200/80 hover:bg-purple-100'
+                            ? 'bg-[#5122fe] text-white shadow-xs scale-102 ring-1 ring-[#5122fe]/40'
+                            : 'bg-purple-50/70 text-purple-900/80 hover:bg-purple-100 border border-purple-200/80'
                         }`}
                       >
-                        {tag}
+                        <span className="material-symbols-outlined text-[12px]">{tag.icon}</span>
+                        <span>{tag.label}</span>
+                        {isSelected && (
+                          <span className="material-symbols-outlined text-[11px]">check</span>
+                        )}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 4. Customer Info */}
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-purple-100">
-                <div>
-                  <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
-                    Your Name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Marcus Vance"
-                    className="w-full h-7.5 px-2.5 rounded-lg bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
-                    Email <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="marcus@sneakers.com"
-                    className="w-full h-7.5 px-2.5 rounded-lg bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600"
-                  />
-                </div>
-              </div>
-
-              {/* 5. Channel & Verification Checkboxes */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                  <span className="text-[10px] text-purple-900/70 font-semibold whitespace-nowrap">Channel:</span>
-                  <select
-                    value={channel}
-                    onChange={(e) => setChannel(e.target.value)}
-                    className="h-6.5 px-2 rounded-lg bg-purple-50/60 border border-purple-200 text-[10px] text-purple-950 focus:outline-none focus:border-purple-600 font-medium"
-                  >
-                    <option value="Direct Web">Direct Web</option>
-                    <option value="Shopify Store">Shopify Store</option>
-                    <option value="Amazon Global">Amazon Global</option>
-                    <option value="In-App iOS">In-App iOS</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-3 text-[10px] font-medium text-purple-950">
-                  <label className="flex items-center gap-1 cursor-pointer">
+              {/* 4. Customer Identity & Verification */}
+              <div className="space-y-2.5 pt-2 border-t border-purple-100">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
+                      Your Name <span className="text-rose-500">*</span>
+                    </label>
                     <input
-                      type="checkbox"
-                      checked={recommend}
-                      onChange={(e) => setRecommend(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded text-purple-600 focus:ring-purple-500"
+                      type="text"
+                      required
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Marcus Vance"
+                      className="w-full h-8 px-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe] transition-all"
                     />
-                    <span>Recommends Shoe</span>
-                  </label>
+                  </div>
 
-                  <label className="flex items-center gap-1 cursor-pointer">
+                  <div>
+                    <label className="block text-[10px] font-bold text-purple-950 mb-0.5">
+                      Email <span className="text-rose-500">*</span>
+                    </label>
                     <input
-                      type="checkbox"
-                      checked={verifiedPurchase}
-                      onChange={(e) => setVerifiedPurchase(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded text-purple-600 focus:ring-purple-500"
+                      type="email"
+                      required
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="marcus@sneakers.com"
+                      className="w-full h-8 px-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe] transition-all"
                     />
-                    <span>Verified Buyer</span>
-                  </label>
+                  </div>
+                </div>
+
+                {/* Channel & Verification Checkbox Badges */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-purple-900/70 font-semibold whitespace-nowrap">Channel:</span>
+                    <select
+                      value={channel}
+                      onChange={(e) => setChannel(e.target.value)}
+                      className="h-7 px-2 rounded-xl bg-purple-50/60 border border-purple-200 text-[10px] text-purple-950 focus:outline-none focus:border-[#5122fe] font-medium cursor-pointer"
+                    >
+                      <option value="Direct Web">Direct Web</option>
+                      <option value="Nike SNKRS App">Nike SNKRS App</option>
+                      <option value="Shopify Store">Shopify Store</option>
+                      <option value="Amazon Global">Amazon Global</option>
+                      <option value="In-App iOS">In-App iOS</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRecommend(!recommend)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-semibold border flex items-center gap-1 transition-all cursor-pointer ${
+                        recommend 
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                          : 'bg-purple-50/50 text-purple-400 border-purple-200'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[13px]">{recommend ? 'thumb_up' : 'thumb_up_off'}</span>
+                      <span>Recommends</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setVerifiedPurchase(!verifiedPurchase)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-semibold border flex items-center gap-1 transition-all cursor-pointer ${
+                        verifiedPurchase 
+                          ? 'bg-[#f5f2ff] text-[#5122fe] border-purple-300' 
+                          : 'bg-purple-50/50 text-purple-400 border-purple-200'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[13px]">verified</span>
+                      <span>Verified Buyer</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Photo Upload (Up to 6), Review Title & Body, Submit Button (7 cols on lg) */}
-            <div className="lg:col-span-7 space-y-3 lg:border-l border-purple-100 lg:pl-5">
+            {/* RIGHT COLUMN: 6-Slot Photo Gallery, Headline with Quick Suggest Chips, Body & Submit (7 cols) */}
+            <div className="lg:col-span-7 space-y-3.5 lg:border-l border-purple-100 lg:pl-6">
               
-              {/* Photo Upload Header & 6-Slots Grid */}
+              {/* Photo Upload Section */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-purple-600">photo_library</span>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[17px] text-[#5122fe]">photo_library</span>
                     <label className="text-[11px] font-bold text-purple-950">
                       Shoe Photos ({photos.length} / 6 uploaded)
                     </label>
                   </div>
 
                   {photos.length < 6 && (
-                    <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold shadow-2xs transition-colors">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#5122fe] hover:bg-[#4316df] text-white text-[11px] font-bold shadow-xs shadow-[#5122fe]/30 transition-all hover:scale-102 active:scale-98">
                       <span className="material-symbols-outlined text-[14px]">add_a_photo</span>
                       <span>Upload Photos</span>
                       <input
@@ -449,99 +502,136 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
                   {photos.map((imgUrl, index) => (
                     <div 
                       key={index} 
-                      className="relative group aspect-square rounded-xl overflow-hidden border-2 border-purple-200 bg-purple-50 shadow-2xs"
+                      className="relative group aspect-square rounded-2xl overflow-hidden border-2 border-[#5122fe] bg-purple-50 shadow-xs"
                     >
                       <img
                         src={imgUrl}
                         alt={`Shoe upload ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       />
-                      <span className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] px-1 py-0.2 rounded font-mono font-medium">
-                        {index + 1}
+                      
+                      {/* Hover Overlay with Delete Action */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-1.5">
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="self-end w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-xs"
+                          title="Remove photo"
+                        >
+                          <span className="material-symbols-outlined text-[12px]">close</span>
+                        </button>
+                        <div className="text-[8px] text-white font-medium truncate">
+                          {SLOT_LABELS[index] || `Photo ${index + 1}`}
+                        </div>
+                      </div>
+
+                      <span className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] px-1 py-0.2 rounded font-mono font-medium group-hover:opacity-0 transition-opacity">
+                        #{index + 1}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => removePhoto(index)}
-                        className="absolute top-1 right-1 w-4.5 h-4.5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity"
-                        title="Remove photo"
-                      >
-                        <span className="material-symbols-outlined text-[11px]">close</span>
-                      </button>
                     </div>
                   ))}
 
-                  {/* Empty slots to complete up to 6 */}
-                  {Array.from({ length: 6 - photos.length }).map((_, i) => (
-                    <label
-                      key={`empty-${i}`}
-                      className="aspect-square rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-500 bg-purple-50/30 hover:bg-purple-50/70 flex flex-col items-center justify-center text-purple-400 hover:text-purple-700 transition-colors cursor-pointer group"
+                  {/* Empty interactive slots to complete up to 6 */}
+                  {Array.from({ length: 6 - photos.length }).map((_, i) => {
+                    const slotIdx = photos.length + i;
+                    return (
+                      <label
+                        key={`empty-${slotIdx}`}
+                        className="aspect-square rounded-2xl border-2 border-dashed border-purple-200 hover:border-[#5122fe] bg-purple-50/30 hover:bg-[#f5f2ff] flex flex-col items-center justify-center text-purple-400 hover:text-[#5122fe] transition-all cursor-pointer group p-1 text-center"
+                      >
+                        <span className="material-symbols-outlined text-[18px] group-hover:scale-115 transition-transform text-[#7b4eff]">add_photo_alternate</span>
+                        <span className="text-[9px] font-bold mt-0.5 text-purple-950">Slot {slotIdx + 1}</span>
+                        <span className="text-[8px] text-purple-500/80 leading-tight line-clamp-1">{SLOT_LABELS[slotIdx]}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Review Headline & Quick Suggestion Chips */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-purple-950">
+                    Review Headline <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-purple-400">{title.length} / 100</span>
+                </div>
+
+                <input
+                  type="text"
+                  required
+                  maxLength={100}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Next level heel recoil for marathon prep and daily wear"
+                  className="w-full h-8.5 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe] transition-all placeholder:text-purple-300"
+                />
+
+                {/* Quick Title Suggestion Chips */}
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  <span className="text-[9px] text-purple-400 font-semibold">Quick suggest:</span>
+                  {SUGGESTED_HEADLINES.map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setTitle(preset)}
+                      className="text-[9px] px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/60 transition-colors cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[17px] group-hover:scale-110 transition-transform">add_photo_alternate</span>
-                      <span className="text-[9px] font-medium mt-0.5">Slot {photos.length + i + 1}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </label>
+                      + {preset}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Review Headline Takeaway */}
+              {/* Written Review Body */}
               <div>
-                <label className="block text-[11px] font-bold text-purple-950 mb-1">
-                  Review Headline <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Next level heel recoil for marathon prep and daily wear"
-                  className="w-full h-8 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all placeholder:text-purple-300"
-                />
-              </div>
-
-              {/* Written Review Body (Compact 3 rows to keep non-scrollable) */}
-              <div>
-                <label className="block text-[11px] font-bold text-purple-950 mb-1">
-                  Written Feedback <span className="text-rose-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-purple-950">
+                    Written Feedback <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-purple-400">{body.length} / 600</span>
+                </div>
                 <textarea
                   required
                   rows={3}
+                  maxLength={600}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="Describe ground feel, cushioning rebound, toe-box width, and outsole durability across surfaces..."
-                  className="w-full p-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all leading-relaxed placeholder:text-purple-300"
+                  className="w-full p-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-1 focus:ring-[#5122fe] transition-all leading-relaxed placeholder:text-purple-300"
                 ></textarea>
               </div>
 
-              {/* Submit Action Strip */}
-              <div className="pt-2 flex items-center justify-between gap-3">
+              {/* Submit Action Strip with Live Photo Count Badge */}
+              <div className="pt-2 flex items-center justify-between gap-3 border-t border-purple-100">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-3 py-1.5 rounded-xl text-[11px] font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
+                  className="px-3.5 py-2 rounded-xl text-[11px] font-semibold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  Clear Form
+                  <span className="material-symbols-outlined text-[14px]">refresh</span>
+                  <span>Clear Form</span>
                 </button>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white text-xs font-bold shadow-md shadow-purple-300 transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-98"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5122fe] via-[#5e31f7] to-[#7b4eff] hover:from-[#4316df] hover:to-[#6830ff] text-white text-xs font-bold shadow-md shadow-[#5122fe]/30 hover:shadow-lg hover:shadow-[#5122fe]/45 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? (
                     <>
-                      <span className="material-symbols-outlined text-[15px] animate-spin">refresh</span>
-                      <span>Publishing...</span>
+                      <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+                      <span>Publishing Review...</span>
                     </>
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[15px]">send</span>
+                      <span className="material-symbols-outlined text-[16px]">send</span>
                       <span>Submit Review ({photos.length} Photos)</span>
                     </>
                   )}
