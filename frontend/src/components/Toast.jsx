@@ -9,9 +9,9 @@ export default function Toast({ toast, onClose }) {
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
       <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-sm font-semibold ${
-        isSuccess ? 'bg-[#24123d] text-white border-emerald-500/40' :
+        isSuccess ? 'bg-purple-950 text-white border-emerald-500/40 shadow-purple-950/20' :
         isError ? 'bg-[#93000a] text-white border-[#ba1a1a]' :
-        'bg-[#24123d] text-white border-purple-500/40'
+        'bg-purple-950 text-white border-purple-500/40 shadow-purple-950/20'
       }`}>
         <span className="material-symbols-outlined text-[20px] text-[#6ffbbe]">
           {isSuccess ? 'check_circle' : isError ? 'error' : 'info'}

@@ -36,7 +36,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#faf7fd] text-[#1e1333] flex flex-col selection:bg-purple-200 selection:text-purple-900 font-sans">
+    <div className="min-h-screen bg-[#fcfaff] text-[#1a0f30] flex flex-col selection:bg-[#5122fe] selection:text-white font-sans">
       
       {/* Floating Island Navigation */}
       <Navbar
