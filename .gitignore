@@ -1,0 +1,50 @@
+# Root .gitignore for PulseReview Platform
+
+# Node dependencies & build artifacts
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+frontend/dist-ssr/
+*.local
+
+# Python virtual environments & caches
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+backend/.venv/
+venv/
+.venv/
+backend/__pycache__/
+backend/app/**/__pycache__/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+backend/feedback.db
+feedback.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.sw?

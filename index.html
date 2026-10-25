@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review and Moderation System - Screens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 24px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124, 58, 237, 0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(540px, 1fr));
+      gap: 28px;
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #7c3aed;
+      box-shadow: 0 12px 30px -10px rgba(124, 58, 237, 0.3);
+    }
+    .preview-container {
+      position: relative;
+      background: #030712;
+      height: 320px;
+      overflow: hidden;
+      border-bottom: 1px solid #1f2937;
+    }
+    .preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .preview-img {
+      transform: scale(1.02);
+    }
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .screen-number {
+      font-size: 12px;
+      color: #a78bfa;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .screen-id {
+      font-family: monospace;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #7c3aed;
+      color: #ffffff;
+      flex: 1;
+    }
+    .btn-primary:hover {
+      background: #6d28d9;
+    }
+    .btn-secondary {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">
+        <span class="material-symbols-outlined" style="font-size:16px;">layers</span>
+        Stitch Project
+      </div>
+      <h1>Review and Moderation System</h1>
+      <p class="subtitle">Project ID: <code>4542735903285974801</code> &bull; 4 Desktop Screens Downloaded</p>
+    </header>
+
+    <div class="grid">
+      <!-- Screen 1 -->
+      <div class="card">
+        <div class="preview-container">
+          <img src="screens/1_analytics_and_insights/screen.png" alt="Analytics & Insights Preview" class="preview-img">
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="screen-number">Screen 1</div>
+            <h2 class="card-title">Analytics & Insights</h2>
+            <div class="screen-id">ID: 40bfd92772034b01bdad7e2706aa8f63</div>
+          </div>
+          <div class="card-actions">
+            <a href="screens/1_analytics_and_insights/screen.html" target="_blank" class="btn btn-primary">
+              <span class="material-symbols-outlined" style="font-size:16px;">code</span>
+              View Live HTML
+            </a>
+            <a href="screens/1_analytics_and_insights/screen.png" target="_blank" class="btn btn-secondary">
+              <span class="material-symbols-outlined" style="font-size:16px;">image</span>
+              Image
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen 2 -->
+      <div class="card">
+        <div class="preview-container">
+          <img src="screens/2_admin_moderation_queue/screen.png" alt="Admin Moderation Queue Preview" class="preview-img">
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="screen-number">Screen 2</div>
+            <h2 class="card-title">Admin Moderation Queue</h2>
+            <div class="screen-id">ID: 010092cad311461f82a37244f1639720</div>
+          </div>
+          <div class="card-actions">
+            <a href="screens/2_admin_moderation_queue/screen.html" target="_blank" class="btn btn-primary">
+              <span class="material-symbols-outlined" style="font-size:16px;">code</span>
+              View Live HTML
+            </a>
+            <a href="screens/2_admin_moderation_queue/screen.png" target="_blank" class="btn btn-secondary">
+              <span class="material-symbols-outlined" style="font-size:16px;">image</span>
+              Image
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen 3 -->
+      <div class="card">
+        <div class="preview-container">
+          <img src="screens/3_customer_reviews_hub/screen.png" alt="Customer Reviews Hub Preview" class="preview-img">
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="screen-number">Screen 3</div>
+            <h2 class="card-title">Customer Reviews Hub</h2>
+            <div class="screen-id">ID: 6f1d7462427b43fe86d4aa531f79c8eb</div>
+          </div>
+          <div class="card-actions">
+            <a href="screens/3_customer_reviews_hub/screen.html" target="_blank" class="btn btn-primary">
+              <span class="material-symbols-outlined" style="font-size:16px;">code</span>
+              View Live HTML
+            </a>
+            <a href="screens/3_customer_reviews_hub/screen.png" target="_blank" class="btn btn-secondary">
+              <span class="material-symbols-outlined" style="font-size:16px;">image</span>
+              Image
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen 4 -->
+      <div class="card">
+        <div class="preview-container">
+          <img src="screens/4_submit_review/screen.png" alt="Submit Review Preview" class="preview-img">
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="screen-number">Screen 4</div>
+            <h2 class="card-title">Submit Review</h2>
+            <div class="screen-id">ID: 966afef352b0467e8818490ac0014b52</div>
+          </div>
+          <div class="card-actions">
+            <a href="screens/4_submit_review/screen.html" target="_blank" class="btn btn-primary">
+              <span class="material-symbols-outlined" style="font-size:16px;">code</span>
+              View Live HTML
+            </a>
+            <a href="screens/4_submit_review/screen.png" target="_blank" class="btn btn-secondary">
+              <span class="material-symbols-outlined" style="font-size:16px;">image</span>
+              Image
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

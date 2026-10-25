@@ -1,0 +1,15 @@
+import os
+
+class Settings:
+    PROJECT_NAME: str = "PulseReview Enterprise Moderation System"
+    API_V1_STR: str = "/api"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./feedback.db")
+    CORS_ORIGINS: list = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "*"
+    ]
+
+settings = Settings()
