@@ -176,33 +176,84 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
         </div>
       )}
 
+      {/* Sneakerhead Wear-Test Hero Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-950 via-purple-900 to-indigo-950 text-white p-5 sm:p-6 mb-4 shadow-[0_10px_30px_rgba(107,33,168,0.18)] border border-purple-500/25">
+        {/* Ambient atmospheric glow elements */}
+        <div className="absolute -top-10 -right-10 w-44 h-44 bg-purple-500/25 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-fuchsia-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-purple-200 border border-white/15 backdrop-blur-xs flex items-center gap-1">
+                <span className="material-symbols-outlined text-[13px] text-fuchsia-400">local_fire_department</span>
+                Community Footwear Lab
+              </span>
+              <span className="text-purple-300/60 text-xs hidden sm:inline">&bull; Wear-Test Verification</span>
+            </div>
+            <h2 className="font-headline text-lg sm:text-2xl font-extrabold tracking-tight text-white">
+              Submit Shoe Wear-Test Review & Photos
+            </h2>
+            <p className="text-xs sm:text-sm text-purple-200/80 mt-1 max-w-2xl leading-relaxed">
+              Share real-world feedback on sneaker cushion rebound, outsole wear, and up to 6 on-foot photos to help fellow runners and sneakerheads.
+            </p>
+
+            {/* Footwear Wear-Test Feature Pills */}
+            <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-purple-200/90">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                <span className="material-symbols-outlined text-[13px] text-purple-300">steps</span>
+                6 Verified Silhouettes
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                <span className="material-symbols-outlined text-[13px] text-emerald-400">add_a_photo</span>
+                6 High-Res Photo Slots
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                <span className="material-symbols-outlined text-[13px] text-amber-300">verified</span>
+                Verified Buyer Badges
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                <span className="material-symbols-outlined text-[13px] text-fuchsia-300">shield_with_heart</span>
+                Automated Moderation
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Action Badges */}
+          <div className="flex flex-row md:flex-col items-start md:items-end gap-2.5 self-start md:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={loadSamplePhotos}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-fuchsia-600/80 to-purple-600/80 hover:from-fuchsia-500 hover:to-purple-500 text-white text-xs font-bold border border-white/25 backdrop-blur-xs transition-all flex items-center gap-1.5 shadow-sm shadow-purple-950 active:scale-98"
+            >
+              <span className="material-symbols-outlined text-[15px] text-amber-300">bolt</span>
+              <span>⚡ Load 6 Sample Photos</span>
+            </button>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-900/60 border border-purple-400/20">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-[10px] uppercase tracking-wider text-purple-300 font-semibold">Photo Capacity:</span>
+              <span className="text-xs font-bold text-emerald-300">Up to 6</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Broad Card: Full Width max-w-6xl */}
       <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)] p-4 sm:p-5 lg:p-6 transition-all">
         
         {/* Top Header Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-purple-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-700 to-violet-600 flex items-center justify-center text-white shadow-xs">
-              <span className="material-symbols-outlined text-[16px]">rate_review</span>
-            </div>
-            <div>
-              <h1 className="font-headline text-sm sm:text-base font-bold text-purple-950 tracking-tight">
-                Submit Footwear Wear-Test Review
-              </h1>
-              <p className="text-[11px] text-purple-900/60">
-                Share authentic feedback with up to 6 on-foot and detail photos.
-              </p>
-            </div>
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-purple-100">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full border border-purple-200">
+              Review Details Form
+            </span>
+            <span className="text-[11px] text-purple-400">&bull; All fields marked with * are required</span>
           </div>
 
-          <button
-            type="button"
-            onClick={loadSamplePhotos}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-[11px] font-bold border border-purple-200/80 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px] text-purple-600">auto_fix_high</span>
-            ⚡ Load 6 Sample Shoe Photos
-          </button>
+          <span className="text-[11px] text-purple-900/50 font-medium">
+            Step 1 of 1
+          </span>
         </div>
 
         {/* Form Body: Balanced 2-Column Responsive Layout */}

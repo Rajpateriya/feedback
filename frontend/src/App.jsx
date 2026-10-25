@@ -47,8 +47,8 @@ export default function App() {
         searchQuery={searchQuery}
       />
 
-      {/* Main Content Area with breathing room for floating navbar */}
-      <main className="flex-1 pt-15 sm:pt-18 pb-6 w-full">
+      {/* Main Content Area with generous breathing room for floating navbar */}
+      <main className="flex-1 pt-24 sm:pt-28 pb-12 w-full">
         {activeTab === 'hub' && (
           <CustomerReviewsHub
             onNavigateWrite={() => setActiveTab('submit')}
