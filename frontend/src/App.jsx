@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import CustomerReviewsHub from './pages/CustomerReviewsHub';
 import AdminModerationQueue from './pages/AdminModerationQueue';
 import AnalyticsInsights from './pages/AnalyticsInsights';
 import AutoApprovalModal from './components/AutoApprovalModal';
+import StaffPasswordModal from './components/StaffPasswordModal';
+import StaffGateScreen from './components/StaffGateScreen';
 import Toast from './components/Toast';
+import { StaffAuthProvider, useStaffAuth } from './context/StaffAuthContext';
 import { api } from './api/client';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('hub');
+function ProtectedStaffRoute({ children, targetPath, showToast }) {
+  const { isAuthenticated } = useStaffAuth();
+
+  if (!isAuthenticated) {
+    return <StaffGateScreen targetPath={targetPath} showToast={showToast} />;
+  }
+
+  return children;
+}
+
+function MainAppLayout() {
   const [pendingCount, setPendingCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
@@ -39,37 +52,68 @@ export default function App() {
       
       {/* Floating Island Navigation */}
       <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
         pendingCount={pendingCount}
         onSearch={setSearchQuery}
         searchQuery={searchQuery}
       />
 
-      {/* Main Content Area with generous breathing room for floating navbar */}
+      {/* Main Content Area with Routing */}
       <main className="flex-1 pt-24 sm:pt-28 pb-12 w-full">
-        {activeTab === 'hub' && (
-          <CustomerReviewsHub
-            showToast={showToast}
-            searchQuery={searchQuery}
+        <Routes>
+          {/* Public Route: Feed */}
+          <Route 
+            path="/" 
+            element={
+              <CustomerReviewsHub
+                showToast={showToast}
+                searchQuery={searchQuery}
+              />
+            } 
           />
-        )}
+          <Route 
+            path="/feed" 
+            element={
+              <CustomerReviewsHub
+                showToast={showToast}
+                searchQuery={searchQuery}
+              />
+            } 
+          />
 
-        {activeTab === 'moderation' && (
-          <AdminModerationQueue
-            showToast={showToast}
-            onQueueUpdated={refreshPendingCount}
-            searchQuery={searchQuery}
+          {/* Protected Route: Moderation Queue (Requires password 12345) */}
+          <Route 
+            path="/moderation" 
+            element={
+              <ProtectedStaffRoute targetPath="/moderation" showToast={showToast}>
+                <AdminModerationQueue
+                  showToast={showToast}
+                  onQueueUpdated={refreshPendingCount}
+                  searchQuery={searchQuery}
+                />
+              </ProtectedStaffRoute>
+            } 
           />
-        )}
 
-        {activeTab === 'analytics' && (
-          <AnalyticsInsights
-            showToast={showToast}
-            onOpenConfigRules={() => setConfigModalOpen(true)}
+          {/* Protected Route: Analytics Dashboard (Requires password 12345) */}
+          <Route 
+            path="/analytics" 
+            element={
+              <ProtectedStaffRoute targetPath="/analytics" showToast={showToast}>
+                <AnalyticsInsights
+                  showToast={showToast}
+                  onOpenConfigRules={() => setConfigModalOpen(true)}
+                />
+              </ProtectedStaffRoute>
+            } 
           />
-        )}
+
+          {/* Fallback Catch-all: Redirect to Feed */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
+
+      {/* Global Staff Passcode Prompt Modal */}
+      <StaffPasswordModal showToast={showToast} />
 
       {/* Auto-Approval Configuration Dialog */}
       <AutoApprovalModal
@@ -81,5 +125,15 @@ export default function App() {
       {/* Notification Toast */}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <StaffAuthProvider>
+        <MainAppLayout />
+      </StaffAuthProvider>
+    </BrowserRouter>
   );
 }
