@@ -15,7 +15,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount = 0, onSe
     <>
       {/* Floating Island Navbar */}
       <header className="fixed top-3 sm:top-4 inset-x-0 mx-auto max-w-6xl w-[calc(100%-1.5rem)] sm:w-[calc(100%-2.5rem)] z-50">
-        <div className="bg-white/90 backdrop-blur-xl border border-purple-200/80 shadow-[0_8px_30px_rgba(147,51,234,0.08)] rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
+        <div className="bg-white/90 backdrop-blur-xl border border-purple-200/80 shadow-[0_8px_30px_rgba(81,34,254,0.10)] rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
           
           {/* Logo */}
           <button 

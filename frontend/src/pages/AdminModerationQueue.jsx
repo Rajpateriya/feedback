@@ -80,7 +80,7 @@ export default function AdminModerationQueue({ showToast, onQueueUpdated, search
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       
       {/* Top Header & Metrics Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)]">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full border border-purple-200">
@@ -257,7 +257,7 @@ export default function AdminModerationQueue({ showToast, onQueueUpdated, search
                 className={`bg-white rounded-2xl p-5 border transition-all ${
                   isSelected 
                     ? 'border-purple-500 ring-2 ring-purple-500/20 shadow-md' 
-                    : 'border-purple-100 hover:border-purple-300 shadow-[0_1px_3px_rgba(147,51,234,0.03)]'
+                    : 'border-purple-100 hover:border-purple-300 shadow-[0_1px_3px_rgba(81,34,254,0.04)]'
                 }`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">

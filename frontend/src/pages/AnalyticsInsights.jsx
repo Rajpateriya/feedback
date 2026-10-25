@@ -55,7 +55,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)]">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full border border-purple-200">
@@ -111,7 +111,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         
         {/* Metric 1 */}
-        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] flex flex-col justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-medium text-purple-900/60">
             <span>Overall Score</span>
             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200">
@@ -137,7 +137,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
         </div>
 
         {/* Metric 2 */}
-        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] flex flex-col justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-medium text-purple-900/60">
             <span>Verified Volume</span>
             <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded-full border border-purple-200">
@@ -158,7 +158,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
         </div>
 
         {/* Metric 3 */}
-        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] flex flex-col justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-medium text-purple-900/60">
             <span>Instant Clearance</span>
             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200">
@@ -179,7 +179,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
         </div>
 
         {/* Metric 4 */}
-        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] flex flex-col justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-medium text-purple-900/60">
             <span>Median SLA</span>
             <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded-full border border-purple-200">
@@ -204,7 +204,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         
         {/* Rating Distribution */}
-        <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] space-y-3">
+        <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] space-y-3">
           <div className="flex items-center justify-between border-b border-purple-100 pb-3">
             <div>
               <h3 className="font-headline font-bold text-sm sm:text-base text-purple-950">Rating Distribution</h3>
@@ -242,7 +242,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
         </div>
 
         {/* Sentiment & Multi-Channel Feed Yield */}
-        <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] space-y-3">
+        <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] space-y-3">
           <div className="flex items-center justify-between border-b border-purple-100 pb-3">
             <div>
               <h3 className="font-headline font-bold text-sm sm:text-base text-purple-950">Sentiment & Channels</h3>
@@ -295,7 +295,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
       </div>
 
       {/* Daily Velocity Chart */}
-      <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(147,51,234,0.03)] space-y-3">
+      <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-[0_1px_3px_rgba(81,34,254,0.04)] space-y-3">
         <div className="flex items-center justify-between border-b border-purple-100 pb-3">
           <div>
             <h3 className="font-headline font-bold text-sm sm:text-base text-purple-950">Weekly Intake Trajectory</h3>

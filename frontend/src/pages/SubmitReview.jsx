@@ -150,7 +150,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
       
       {/* Result Confirmation Toast Banner */}
       {submittedResult && (
-        <div className="mb-3 p-3.5 rounded-2xl bg-white border border-purple-200/90 shadow-[0_4px_20px_rgba(147,51,234,0.06)] animate-in zoom-in-95 duration-150">
+        <div className="mb-3 p-3.5 rounded-2xl bg-white border border-purple-200/90 shadow-[0_4px_20px_rgba(81,34,254,0.08)] animate-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-600 text-white flex items-center justify-center">
@@ -176,44 +176,44 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
         </div>
       )}
 
-      {/* Sneakerhead Wear-Test Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-950 via-purple-900 to-indigo-950 text-white p-5 sm:p-6 mb-4 shadow-[0_10px_30px_rgba(107,33,168,0.18)] border border-purple-500/25">
-        {/* Ambient atmospheric glow elements */}
-        <div className="absolute -top-10 -right-10 w-44 h-44 bg-purple-500/25 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-fuchsia-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Sneakerhead Wear-Test Hero Banner - Precision Color Coded to #5122fe */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#170460] via-[#2f0e9e] to-[#5122fe] text-white p-5 sm:p-6 mb-4 shadow-[0_14px_36px_rgba(81,34,254,0.22)] border border-[#7b4eff]/30 ring-1 ring-white/10">
+        {/* Ambient atmospheric glow elements aligned with #5122fe theme */}
+        <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#5122fe]/40 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#7b4eff]/30 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-purple-200 border border-white/15 backdrop-blur-xs flex items-center gap-1">
-                <span className="material-symbols-outlined text-[13px] text-fuchsia-400">local_fire_department</span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20 backdrop-blur-xs flex items-center gap-1">
+                <span className="material-symbols-outlined text-[13px] text-[#c1aeff]">local_fire_department</span>
                 Community Footwear Lab
               </span>
-              <span className="text-purple-300/60 text-xs hidden sm:inline">&bull; Wear-Test Verification</span>
+              <span className="text-purple-200/80 text-xs hidden sm:inline">&bull; Wear-Test Verification</span>
             </div>
             <h2 className="font-headline text-lg sm:text-2xl font-extrabold tracking-tight text-white">
               Submit Shoe Wear-Test Review & Photos
             </h2>
-            <p className="text-xs sm:text-sm text-purple-200/80 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-purple-100/90 mt-1 max-w-2xl leading-relaxed">
               Share real-world feedback on sneaker cushion rebound, outsole wear, and up to 6 on-foot photos to help fellow runners and sneakerheads.
             </p>
 
             {/* Footwear Wear-Test Feature Pills */}
-            <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-purple-200/90">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
-                <span className="material-symbols-outlined text-[13px] text-purple-300">steps</span>
+            <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-white/95">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
+                <span className="material-symbols-outlined text-[13px] text-[#c1aeff]">steps</span>
                 6 Verified Silhouettes
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
-                <span className="material-symbols-outlined text-[13px] text-emerald-400">add_a_photo</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
+                <span className="material-symbols-outlined text-[13px] text-emerald-300">add_a_photo</span>
                 6 High-Res Photo Slots
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
                 <span className="material-symbols-outlined text-[13px] text-amber-300">verified</span>
                 Verified Buyer Badges
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/10">
-                <span className="material-symbols-outlined text-[13px] text-fuchsia-300">shield_with_heart</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15">
+                <span className="material-symbols-outlined text-[13px] text-[#dbd0ff]">shield_with_heart</span>
                 Automated Moderation
               </span>
             </div>
@@ -224,15 +224,15 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
             <button
               type="button"
               onClick={loadSamplePhotos}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-fuchsia-600/80 to-purple-600/80 hover:from-fuchsia-500 hover:to-purple-500 text-white text-xs font-bold border border-white/25 backdrop-blur-xs transition-all flex items-center gap-1.5 shadow-sm shadow-purple-950 active:scale-98"
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 text-[#5122fe] text-xs font-bold shadow-lg shadow-[#170460]/20 transition-all flex items-center gap-1.5 active:scale-98 border border-white cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[15px] text-amber-300">bolt</span>
+              <span className="material-symbols-outlined text-[16px] text-[#5122fe]">bolt</span>
               <span>⚡ Load 6 Sample Photos</span>
             </button>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-900/60 border border-purple-400/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#170460]/60 border border-white/15 backdrop-blur-xs text-white">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-[10px] uppercase tracking-wider text-purple-300 font-semibold">Photo Capacity:</span>
+              <span className="text-[10px] uppercase tracking-wider text-purple-200 font-semibold">Photo Capacity:</span>
               <span className="text-xs font-bold text-emerald-300">Up to 6</span>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function SubmitReview({ onReviewSubmitted, showToast }) {
       </div>
 
       {/* Main Broad Card: Full Width max-w-6xl */}
-      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)] p-4 sm:p-5 lg:p-6 transition-all">
+      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)] p-4 sm:p-5 lg:p-6 transition-all">
         
         {/* Top Header Strip */}
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-purple-100">

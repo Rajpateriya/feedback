@@ -75,7 +75,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       
       {/* Overview Card: Full Graceful Coverage across max-w-6xl */}
-      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(147,51,234,0.04)] p-5 sm:p-6 transition-all">
+      <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)] p-5 sm:p-6 transition-all">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
           {/* Left Rating Block (Col 1-4) */}
@@ -313,7 +313,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             return (
               <div
                 key={r.id}
-                className="bg-white rounded-2xl p-5 sm:p-6 border border-purple-100 hover:border-purple-300 shadow-[0_1px_3px_rgba(147,51,234,0.03)] hover:shadow-[0_4px_20px_rgba(147,51,234,0.06)] transition-all flex flex-col space-y-3"
+                className="bg-white rounded-2xl p-5 sm:p-6 border border-purple-100 hover:border-purple-300 shadow-[0_1px_3px_rgba(81,34,254,0.03)] hover:shadow-[0_4px_20px_rgba(81,34,254,0.08)] transition-all flex flex-col space-y-3"
               >
                 {/* Header row: User, Product, Rating, Channel */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
