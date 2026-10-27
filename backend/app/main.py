@@ -2,26 +2,20 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .database import engine, Base, SessionLocal
-from .models.review import Review, ModerationRule
-from .services.seed_data import seed_database
+from .database import init_db, client, db, products_col, serialize_doc
 from .routers import reviews, moderation, analytics
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables and seed initial database
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        seed_database(db)
-    finally:
-        db.close()
+    # Startup: initialize MongoDB collections and indexes (zero seed reviews)
+    init_db()
     yield
     # Shutdown
+    client.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="Scalable Production-Ready Review & Moderation Telemetry Backend",
+    description="Scalable Production-Ready MongoDB Review & Moderation Telemetry Backend",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -40,16 +34,31 @@ app.include_router(reviews.router, prefix=settings.API_V1_STR)
 app.include_router(moderation.router, prefix=settings.API_V1_STR)
 app.include_router(analytics.router, prefix=settings.API_V1_STR)
 
+@app.get("/api/products")
+def get_products():
+    """Top-level products endpoint for frontend selectors."""
+    return list(products_col.find({}, {"_id": 0}))
+
 @app.get("/api/health")
 def healthcheck():
+    try:
+        # Ping MongoDB
+        client.admin.command('ping')
+        mongo_status = "connected"
+    except Exception as e:
+        mongo_status = f"error: {str(e)}"
+
     return {
-        "status": "healthy",
+        "status": "healthy" if mongo_status == "connected" else "degraded",
         "service": "PulseReview Enterprise API",
+        "database": "MongoDB",
+        "database_status": mongo_status,
+        "database_name": settings.DATABASE_NAME,
         "version": "1.0.0"
     }
 
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to PulseReview API. Explore /docs for OpenAPI specs."
+        "message": "Welcome to PulseReview API backed by MongoDB. Explore /docs for OpenAPI specs."
     }

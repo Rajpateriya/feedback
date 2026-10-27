@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../api/client';
 
-const SHOE_PRODUCTS = [
+const DEFAULT_SHOE_PRODUCTS = [
   { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning' },
   { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run' },
   { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic' },
@@ -31,7 +31,11 @@ const SAMPLE_SHOE_PHOTOS = [
 ];
 
 export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted, showToast }) {
-  const [selectedProduct, setSelectedProduct] = useState(SHOE_PRODUCTS[0]);
+  const [productsList, setProductsList] = useState(DEFAULT_SHOE_PRODUCTS);
+  const [isCustomProduct, setIsCustomProduct] = useState(false);
+  const [customSku, setCustomSku] = useState('');
+  const [customName, setCustomName] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(DEFAULT_SHOE_PRODUCTS[0]);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [title, setTitle] = useState('');
@@ -45,6 +49,20 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
   const [photos, setPhotos] = useState([]); // Up to 6 photos
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
+
+  // Load products dynamically from MongoDB backend
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const prods = await api.getProducts();
+        if (prods && prods.length > 0) {
+          setProductsList(prods);
+          setSelectedProduct(prods[0]);
+        }
+      } catch (_) {}
+    }
+    fetchProducts();
+  }, []);
 
   if (isOpen === false) return null;
 
@@ -119,14 +137,16 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
 
     try {
       setSubmitting(true);
+      const finalSku = isCustomProduct ? (customSku.trim() || 'CUSTOM-SKU-1') : (selectedProduct?.sku || 'SHOE-PULSE');
+      const finalName = isCustomProduct ? (customName.trim() || 'Custom Footwear') : (selectedProduct?.name || 'Footwear Model');
       const payload = {
         title: title.trim(),
         body: body.trim(),
         rating,
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
-        sku: selectedProduct.sku,
-        product_name: selectedProduct.name,
+        sku: finalSku,
+        product_name: finalName,
         channel,
         recommend,
         verified_purchase: verifiedPurchase,
@@ -237,30 +257,59 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
             {/* ========================================================= */}
             <div className="space-y-3.5">
               
-              {/* 1. Shoe Model Dropdown */}
+              {/* 1. Shoe Model Dropdown / Custom Input */}
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-purple-950">
-                  Select Shoe Model <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedProduct.sku}
-                    onChange={(e) => {
-                      const prod = SHOE_PRODUCTS.find(p => p.sku === e.target.value);
-                      if (prod) setSelectedProduct(prod);
-                    }}
-                    className="w-full h-10.5 px-3.5 pr-9 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 font-semibold focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-purple-950">
+                    Select Shoe Model <span className="text-rose-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomProduct(!isCustomProduct)}
+                    className="text-[11px] font-semibold text-[#5122fe] hover:underline cursor-pointer"
                   >
-                    {SHOE_PRODUCTS.map((prod) => (
-                      <option key={prod.sku} value={prod.sku}>
-                        {prod.name} — {prod.category} ({prod.sku})
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-purple-500 flex items-center">
-                    <span className="material-symbols-outlined text-[20px]">expand_more</span>
-                  </div>
+                    {isCustomProduct ? '← Choose from Catalog' : '+ Custom Product'}
+                  </button>
                 </div>
+
+                {isCustomProduct ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Product Name (e.g. Puma Deviate Nitro)"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 font-semibold focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20"
+                    />
+                    <input
+                      type="text"
+                      placeholder="SKU (e.g. SHOE-PUMA-NITRO)"
+                      value={customSku}
+                      onChange={(e) => setCustomSku(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-purple-50/40 border border-purple-200 text-xs text-purple-950 font-semibold focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={selectedProduct?.sku || ''}
+                      onChange={(e) => {
+                        const prod = productsList.find(p => p.sku === e.target.value);
+                        if (prod) setSelectedProduct(prod);
+                      }}
+                      className="w-full h-10.5 px-3.5 pr-9 rounded-xl bg-purple-50/40 border border-purple-200 text-xs sm:text-sm text-purple-950 font-semibold focus:outline-none focus:bg-white focus:border-[#5122fe] focus:ring-2 focus:ring-[#5122fe]/20 transition-all cursor-pointer appearance-none"
+                    >
+                      {productsList.map((prod) => (
+                        <option key={prod.sku} value={prod.sku}>
+                          {prod.name} — {prod.category || 'Footwear'} ({prod.sku})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-purple-500 flex items-center">
+                      <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 2. Star Rating */}

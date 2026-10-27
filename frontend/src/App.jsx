@@ -22,7 +22,7 @@ function ProtectedStaffRoute({ children, targetPath, showToast }) {
 }
 
 function MainAppLayout() {
-  const [pendingCount, setPendingCount] = useState(3);
+  const [pendingCount, setPendingCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
   const [configModalOpen, setConfigModalOpen] = useState(false);

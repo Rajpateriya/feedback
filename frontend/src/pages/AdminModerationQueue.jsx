@@ -101,12 +101,12 @@ export default function AdminModerationQueue({ showToast, onQueueUpdated, search
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 rounded-xl bg-purple-50/70 border border-purple-200 text-left">
             <div className="text-[9px] font-semibold text-purple-500 uppercase">Median SLA</div>
-            <div className="text-xs font-bold text-purple-950">{metrics.median_sla_minutes || 4.2}m</div>
+            <div className="text-xs font-bold text-purple-950">{metrics.median_sla_minutes !== undefined ? metrics.median_sla_minutes : 0}m</div>
           </div>
 
           <div className="px-3 py-1.5 rounded-xl bg-purple-50/70 border border-purple-200 text-left">
             <div className="text-[9px] font-semibold text-purple-500 uppercase">Auto-Clear</div>
-            <div className="text-xs font-bold text-emerald-700">{metrics.auto_clear_rate || 94.8}%</div>
+            <div className="text-xs font-bold text-emerald-700">{metrics.auto_clear_rate !== undefined ? metrics.auto_clear_rate : 0}%</div>
           </div>
 
           <div className="px-3 py-1.5 rounded-xl bg-purple-100/80 border border-purple-300 text-left">

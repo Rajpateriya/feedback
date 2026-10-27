@@ -2,30 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import StaffToolbar from '../components/StaffToolbar';
 
-const SHOE_MODELS = [
-  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning', baseRating: 4.8, baseVolume: 34, verifiedPct: 94, attribute: 'Air Bubble Heel', icon: 'steps' },
-  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run', baseRating: 4.7, baseVolume: 28, verifiedPct: 91, attribute: 'Light BOOST Foam', icon: 'sprint' },
-  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic', baseRating: 4.9, baseVolume: 42, verifiedPct: 97, attribute: 'Full Grain Leather', icon: 'sports_basketball' },
-  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle', baseRating: 4.6, baseVolume: 25, verifiedPct: 88, attribute: 'ABZORB Dual Midsole', icon: 'directions_walk' },
-  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Max Road Cushion', baseRating: 4.8, baseVolume: 30, verifiedPct: 93, attribute: 'Monster CloudTec', icon: 'cloud' },
-  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail / All-Terrain', baseRating: 4.9, baseVolume: 38, verifiedPct: 95, attribute: 'Agile Chassis System', icon: 'hiking' },
-];
 
-const HOURLY_INTERVALS = [
-  { slot: '00-04h', label: 'Overnight', volume: 8, pct: 10, peak: false },
-  { slot: '04-08h', label: 'Early Bird', volume: 14, pct: 17, peak: false },
-  { slot: '08-12h', label: 'Morning Peak', volume: 54, pct: 64, peak: false },
-  { slot: '12-16h', label: 'Midday Rush', volume: 72, pct: 85, peak: false },
-  { slot: '16-20h', label: 'Evening Prime', volume: 85, pct: 100, peak: true },
-  { slot: '20-24h', label: 'Late Evening', volume: 38, pct: 45, peak: false },
-];
-
-const SLA_BREAKDOWN = [
-  { tier: '< 2m (Instant AI)', label: 'Zero-Touch Pass', count: 16, pct: 72.7, color: 'from-[#5122fe] to-[#7b4eff]', badge: 'Ultra-Fast' },
-  { tier: '2 - 5m', label: 'Fast Moderator Pass', count: 4, pct: 18.2, color: 'from-emerald-500 to-teal-500', badge: 'On-Track' },
-  { tier: '5 - 10m', label: 'In-Depth Triage', count: 2, pct: 9.1, color: 'from-amber-400 to-amber-500', badge: 'Within SLA' },
-  { tier: '> 10m', label: 'SLA Breach Target', count: 0, pct: 0, color: 'from-rose-500 to-red-600', badge: 'Zero Breaches' },
-];
 
 export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
   const [data, setData] = useState(null);
@@ -63,8 +40,8 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
     csvContent += `Overview,Median SLA (min),${data.median_sla_minutes}\n`;
     csvContent += `Overview,Verified Purchase (%),${data.verified_percentage}\n`;
     
-    // Silhouette models
-    SHOE_MODELS.forEach((shoe) => {
+    // Footwear models from live MongoDB telemetry
+    shoeModels.forEach((shoe) => {
       csvContent += `Footwear Model,${shoe.name} - Rating,${shoe.baseRating}\n`;
       csvContent += `Footwear Model,${shoe.name} - Reviews,${shoe.baseVolume}\n`;
     });
@@ -114,11 +91,10 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
   const maxDailyVolume = Math.max(...dailyData.map(d => chartMode === 'stacked' ? d.volume : Math.max(d.approved, d.flagged)), 90);
   const avgDailyVolume = Math.round(dailyData.reduce((acc, cur) => acc + cur.volume, 0) / (dailyData.length || 1));
 
-  // Hourly volume adjusted for timeRange
-  const hourlyData = HOURLY_INTERVALS.map(h => ({
-    ...h,
-    volume: Math.round(h.volume * multiplier),
-  }));
+  // Dynamic backend telemetry collections
+  const shoeModels = data.product_telemetry || [];
+  const hourlyData = data.hourly_intervals || [];
+  const slaBreakdown = data.sla_breakdown || [];
 
   // Sentiment totals
   const totalSentiment = (data.sentiment_breakdown?.Positive || 0) + 
@@ -796,7 +772,12 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
 
           {/* Model Horizontal Bar Graphs */}
           <div className="space-y-4 pt-1">
-            {SHOE_MODELS.map((shoe) => {
+            {shoeModels.length === 0 ? (
+              <div className="text-center py-8 text-xs text-purple-900/60 bg-purple-50/40 rounded-xl">
+                No product reviews yet. Write a review to see product telemetry.
+              </div>
+            ) : (
+              shoeModels.map((shoe) => {
               const ratingPct = (shoe.baseRating / 5.0) * 100;
               const volumeScaled = Math.round(shoe.baseVolume * multiplier);
               const volumePct = (volumeScaled / 50) * 100;
@@ -849,7 +830,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
 
@@ -918,7 +899,7 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
             </div>
 
             <div className="space-y-3 pt-1">
-              {SLA_BREAKDOWN.map((tier) => (
+              {slaBreakdown.map((tier) => (
                 <div key={tier.tier} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5">

@@ -1,10 +1,9 @@
 import datetime
+import re
 from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
-from sqlalchemy import desc, or_
-from ..database import get_db
-from ..models.review import Review, ModerationRule
+from fastapi import APIRouter, HTTPException, Query, status
+from bson import ObjectId
+from ..database import reviews_col, moderation_rules_col, serialize_doc
 from ..schemas.review import (
     ReviewResponse,
     ModerationAction,
@@ -15,51 +14,75 @@ from ..schemas.review import (
 
 router = APIRouter(prefix="/moderation", tags=["Moderation"])
 
+def get_object_id_query(id_str: str):
+    """Attempt ObjectId query, fallback to string matching."""
+    try:
+        return {"$or": [{"_id": ObjectId(id_str)}, {"id": id_str}]}
+    except Exception:
+        return {"$or": [{"id": id_str}, {"_id": id_str}]}
+
 @router.get("/queue")
 def get_moderation_queue(
     tab: str = Query("pending", pattern="^(pending|approved|flagged|escalated|all)$"),
     search: Optional[str] = Query(None),
     sku: Optional[str] = Query(None),
-    min_toxicity: Optional[float] = Query(None),
-    db: Session = Depends(get_db)
+    min_toxicity: Optional[float] = Query(None)
 ):
-    # Overall queue counter metrics
-    pending_count = db.query(Review).filter(Review.status == "pending").count()
-    approved_count = db.query(Review).filter(Review.status == "approved").count()
-    flagged_count = db.query(Review).filter(Review.status == "flagged").count()
-    escalated_count = db.query(Review).filter(Review.status == "escalated").count()
-    total_count = db.query(Review).count()
+    # Overall queue counter metrics from MongoDB
+    pending_count = reviews_col.count_documents({"status": "pending"})
+    approved_count = reviews_col.count_documents({"status": "approved"})
+    flagged_count = reviews_col.count_documents({"status": "flagged"})
+    escalated_count = reviews_col.count_documents({"status": "escalated"})
+    total_count = reviews_col.count_documents({})
 
-    # Query for the requested tab
-    query = db.query(Review)
+    filter_q = {}
     if tab != "all":
-        query = query.filter(Review.status == tab)
+        filter_q["status"] = tab
 
     if sku:
-        query = query.filter(Review.sku == sku)
+        filter_q["sku"] = sku
 
     if min_toxicity is not None:
-        query = query.filter(Review.toxicity_score >= min_toxicity)
+        filter_q["toxicity_score"] = {"$gte": min_toxicity}
 
     if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            or_(
-                Review.title.ilike(search_term),
-                Review.body.ilike(search_term),
-                Review.customer_name.ilike(search_term),
-                Review.sku.ilike(search_term),
-                Review.tags.ilike(search_term)
-            )
-        )
+        search_escaped = re.escape(search)
+        regex = {"$regex": search_escaped, "$options": "i"}
+        filter_q["$or"] = [
+            {"title": regex},
+            {"body": regex},
+            {"customer_name": regex},
+            {"sku": regex},
+            {"product_name": regex},
+            {"tags": regex}
+        ]
 
     # Sort priority: highest toxicity and newest first
     if tab == "flagged":
-        reviews = query.order_by(desc(Review.toxicity_score), desc(Review.created_at)).all()
+        sort_spec = [("toxicity_score", -1), ("created_at", -1)]
     else:
-        reviews = query.order_by(desc(Review.created_at)).all()
+        sort_spec = [("created_at", -1)]
 
-    auto_clear_rate = round((approved_count / max(1, total_count)) * 100, 1)
+    cursor = reviews_col.find(filter_q).sort(sort_spec)
+    reviews_list = [serialize_doc(doc) for doc in cursor]
+
+    # Calculate real SLA turnaround from moderated reviews
+    moderated_cursor = reviews_col.find({"moderated_at": {"$ne": None}, "created_at": {"$ne": None}})
+    sla_times = []
+    for doc in moderated_cursor:
+        mod_at = doc.get("moderated_at")
+        cre_at = doc.get("created_at")
+        if isinstance(mod_at, datetime.datetime) and isinstance(cre_at, datetime.datetime):
+            diff_min = max(0.1, (mod_at - cre_at).total_seconds() / 60.0)
+            sla_times.append(diff_min)
+            
+    if sla_times:
+        sla_times.sort()
+        median_sla = round(sla_times[len(sla_times) // 2], 1)
+    else:
+        median_sla = 0.0
+
+    auto_clear_rate = round((approved_count / max(1, total_count)) * 100, 1) if total_count > 0 else 0.0
 
     return {
         "metrics": {
@@ -68,22 +91,17 @@ def get_moderation_queue(
             "flagged_count": flagged_count,
             "escalated_count": escalated_count,
             "total_count": total_count,
-            "median_sla_minutes": 4.2,
+            "median_sla_minutes": median_sla,
             "auto_clear_rate": auto_clear_rate
         },
-        "reviews": [ReviewResponse.from_orm(r) for r in reviews]
+        "reviews": reviews_list
     }
 
 @router.post("/reviews/{review_id}/action", response_model=ReviewResponse)
 def execute_moderation_action(
-    review_id: int,
-    action_in: ModerationAction,
-    db: Session = Depends(get_db)
+    review_id: str,
+    action_in: ModerationAction
 ):
-    review = db.query(Review).filter(Review.id == review_id).first()
-    if not review:
-        raise HTTPException(status_code=404, detail="Review not found")
-
     action_map = {
         "approve": "approved",
         "reject": "rejected",
@@ -91,25 +109,40 @@ def execute_moderation_action(
         "escalate": "escalated"
     }
 
-    if action_in.action.lower() not in action_map:
+    action_lower = action_in.action.lower()
+    if action_lower not in action_map:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid action: {action_in.action}. Must be one of: approve, reject, flag, escalate"
         )
 
-    review.status = action_map[action_in.action.lower()]
-    review.moderator_note = action_in.note or review.moderation_note
-    review.moderated_by = action_in.moderator_name or "Eleanor Vance"
-    review.moderated_at = datetime.datetime.utcnow()
+    now = datetime.datetime.utcnow()
+    target_status = action_map[action_lower]
+    query = get_object_id_query(review_id)
+    
+    update_data = {
+        "status": target_status,
+        "moderated_by": action_in.moderator_name or "Eleanor Vance",
+        "moderated_at": now,
+        "updated_at": now
+    }
+    if action_in.note:
+        update_data["moderation_note"] = action_in.note
 
-    db.commit()
-    db.refresh(review)
-    return review
+    updated = reviews_col.find_one_and_update(
+        query,
+        {"$set": update_data},
+        return_document=True
+    )
+
+    if not updated:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    return serialize_doc(updated)
 
 @router.post("/bulk-action")
 def execute_bulk_moderation(
-    bulk_in: BulkModerationAction,
-    db: Session = Depends(get_db)
+    bulk_in: BulkModerationAction
 ):
     action_map = {
         "approve": "approved",
@@ -118,60 +151,100 @@ def execute_bulk_moderation(
         "escalate": "escalated"
     }
 
-    if bulk_in.action.lower() not in action_map:
+    action_lower = bulk_in.action.lower()
+    if action_lower not in action_map:
         raise HTTPException(status_code=400, detail="Invalid action")
 
-    reviews = db.query(Review).filter(Review.id.in_(bulk_in.review_ids)).all()
+    target_status = action_map[action_lower]
     now = datetime.datetime.utcnow()
-    target_status = action_map[bulk_in.action.lower()]
 
-    for r in reviews:
-        r.status = target_status
-        r.moderated_by = bulk_in.moderator_name or "Eleanor Vance"
-        r.moderated_at = now
-        if bulk_in.note:
-            r.moderation_note = bulk_in.note
+    id_queries = []
+    for rid in bulk_in.review_ids:
+        try:
+            id_queries.append(ObjectId(rid))
+        except Exception:
+            pass
+        id_queries.append(rid)
 
-    db.commit()
-    return {"updated_count": len(reviews), "target_status": target_status}
+    update_fields = {
+        "status": target_status,
+        "moderated_by": bulk_in.moderator_name or "Eleanor Vance",
+        "moderated_at": now,
+        "updated_at": now
+    }
+    if bulk_in.note:
+        update_fields["moderation_note"] = bulk_in.note
+
+    res = reviews_col.update_many(
+        {"$or": [{"_id": {"$in": id_queries}}, {"id": {"$in": bulk_in.review_ids}}]},
+        {"$set": update_fields}
+    )
+
+    return {"updated_count": res.modified_count, "target_status": target_status}
 
 @router.get("/rules", response_model=ModerationRuleSchema)
-def get_moderation_rules(db: Session = Depends(get_db)):
-    rule = db.query(ModerationRule).filter(ModerationRule.is_active == True).first()
+def get_moderation_rules():
+    rule = moderation_rules_col.find_one({"is_active": True})
     if not rule:
-        rule = ModerationRule(
-            name="Enterprise Trust Engine v4.2",
-            min_rating_for_auto_approve=4,
-            max_toxicity_threshold=0.15,
-            require_verified_purchase=True,
-            require_sentiment_positive=True,
-            auto_flag_keywords="scam,fake,broken,terrible,horrible,refund,cheat,lawsuit,toxic",
-            is_active=True
-        )
-        db.add(rule)
-        db.commit()
-        db.refresh(rule)
-    return rule
+        rule = {
+            "name": "Enterprise Trust Engine v4.2",
+            "min_rating_for_auto_approve": 4,
+            "max_toxicity_threshold": 0.15,
+            "require_verified_purchase": True,
+            "require_sentiment_positive": False,
+            "auto_flag_keywords": "scam,fake,broken,terrible,horrible,refund,cheat,lawsuit,toxic",
+            "is_active": True,
+            "created_at": datetime.datetime.utcnow(),
+            "updated_at": datetime.datetime.utcnow()
+        }
+        res = moderation_rules_col.insert_one(rule)
+        rule["_id"] = res.inserted_id
+    return serialize_doc(rule)
 
 @router.put("/rules", response_model=ModerationRuleSchema)
-def update_moderation_rules(rule_in: ModerationRuleUpdate, db: Session = Depends(get_db)):
-    rule = db.query(ModerationRule).filter(ModerationRule.is_active == True).first()
-    if not rule:
-        raise HTTPException(status_code=404, detail="Rule configuration not found")
-
+def update_moderation_rules(rule_in: ModerationRuleUpdate):
+    update_data = {}
     if rule_in.min_rating_for_auto_approve is not None:
-        rule.min_rating_for_auto_approve = rule_in.min_rating_for_auto_approve
+        update_data["min_rating_for_auto_approve"] = rule_in.min_rating_for_auto_approve
     if rule_in.max_toxicity_threshold is not None:
-        rule.max_toxicity_threshold = rule_in.max_toxicity_threshold
+        update_data["max_toxicity_threshold"] = rule_in.max_toxicity_threshold
     if rule_in.require_verified_purchase is not None:
-        rule.require_verified_purchase = rule_in.require_verified_purchase
+        update_data["require_verified_purchase"] = rule_in.require_verified_purchase
     if rule_in.require_sentiment_positive is not None:
-        rule.require_sentiment_positive = rule_in.require_sentiment_positive
+        update_data["require_sentiment_positive"] = rule_in.require_sentiment_positive
     if rule_in.auto_flag_keywords is not None:
-        rule.auto_flag_keywords = rule_in.auto_flag_keywords
+        update_data["auto_flag_keywords"] = rule_in.auto_flag_keywords
     if rule_in.is_active is not None:
-        rule.is_active = rule_in.is_active
+        update_data["is_active"] = rule_in.is_active
 
-    db.commit()
-    db.refresh(rule)
-    return rule
+    update_data["updated_at"] = datetime.datetime.utcnow()
+
+    updated = moderation_rules_col.find_one_and_update(
+        {"is_active": True},
+        {"$set": update_data},
+        return_document=True
+    )
+    if not updated:
+        # If no rule was marked is_active, update any or insert
+        updated = moderation_rules_col.find_one_and_update(
+            {},
+            {"$set": update_data},
+            return_document=True
+        )
+    if not updated:
+        rule = {
+            "name": "Enterprise Trust Engine v4.2",
+            "min_rating_for_auto_approve": rule_in.min_rating_for_auto_approve or 4,
+            "max_toxicity_threshold": rule_in.max_toxicity_threshold or 0.15,
+            "require_verified_purchase": rule_in.require_verified_purchase if rule_in.require_verified_purchase is not None else True,
+            "require_sentiment_positive": rule_in.require_sentiment_positive if rule_in.require_sentiment_positive is not None else False,
+            "auto_flag_keywords": rule_in.auto_flag_keywords or "scam,fake,broken,terrible,horrible,refund,cheat,lawsuit,toxic",
+            "is_active": True,
+            "created_at": datetime.datetime.utcnow(),
+            "updated_at": datetime.datetime.utcnow()
+        }
+        res = moderation_rules_col.insert_one(rule)
+        rule["_id"] = res.inserted_id
+        return serialize_doc(rule)
+
+    return serialize_doc(updated)

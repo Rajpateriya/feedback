@@ -90,5 +90,17 @@ export const api = {
   // Analytics
   getAnalyticsOverview: () => {
     return request('/api/analytics/overview');
+  },
+
+  // Products
+  getProducts: () => {
+    return request('/api/products');
+  },
+
+  createProduct: (productData) => {
+    return request('/api/products', {
+      method: 'POST',
+      body: JSON.stringify(productData)
+    });
   }
 };

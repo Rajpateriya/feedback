@@ -116,18 +116,18 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
             <div className="flex items-baseline gap-3">
               <span className="font-headline text-3xl sm:text-4xl font-extrabold text-purple-950 tracking-tight">
-                {analytics?.average_rating ? analytics.average_rating.toFixed(1) : '4.6'}
+                {analytics && analytics.total_reviews > 0 ? analytics.average_rating.toFixed(1) : '0.0'}
               </span>
               <div className="flex flex-col">
                 <div className="flex items-center text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span key={star} className="material-symbols-outlined text-[18px] material-symbols-filled">
-                      {star <= Math.round(analytics?.average_rating || 5) ? 'star' : 'star_border'}
+                      {star <= Math.round(analytics?.average_rating || 0) ? 'star' : 'star_border'}
                     </span>
                   ))}
                 </div>
                 <span className="text-[11px] text-purple-900/70 mt-0.5">
-                  Based on {analytics?.total_reviews || reviews.length} verified shoe wear tests
+                  Based on {analytics?.total_reviews ?? reviews.length} customer review{(analytics?.total_reviews ?? reviews.length) === 1 ? '' : 's'}
                 </span>
               </div>
             </div>
@@ -198,21 +198,21 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
                   <span className="material-symbols-outlined text-[14px] text-emerald-600 material-symbols-filled">verified</span>
                   Verified Orders
                 </span>
-                <span className="font-bold text-purple-950">89.4%</span>
+                <span className="font-bold text-purple-950">{analytics ? analytics.verified_percentage : 0}%</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
                 <span className="text-purple-700/80 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px] text-purple-600">photo_camera</span>
                   With Photo Proof
                 </span>
-                <span className="font-bold text-purple-950">78.2%</span>
+                <span className="font-bold text-purple-950">{analytics ? analytics.photo_percentage : 0}%</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
                 <span className="text-purple-700/80 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px] text-purple-600">bolt</span>
                   Auto-Clear Yield
                 </span>
-                <span className="font-bold text-emerald-700">{analytics?.auto_clear_rate || 94.2}%</span>
+                <span className="font-bold text-emerald-700">{analytics ? analytics.auto_clear_rate : 0}%</span>
               </div>
             </div>
           </div>
@@ -222,15 +222,15 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
         <div className="mt-4 pt-3.5 border-t border-purple-100 flex flex-wrap items-center justify-between gap-3 text-[11px] text-purple-900/70">
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-600 material-symbols-filled">verified</span>
-            <span>{analytics?.verified_percentage || 88.5}% Verified Buyer Wear-Tests</span>
+            <span>{analytics ? analytics.verified_percentage : 0}% Verified Buyer Reviews</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-purple-600">timer</span>
-            <span>{analytics?.median_sla_minutes || 4.2}m SLA Triage Turnaround</span>
+            <span>{analytics ? analytics.median_sla_minutes : 0}m SLA Triage Turnaround</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-purple-600">security</span>
-            <span>Algorithmic Trust Engine Active</span>
+            <span>Live MongoDB Backend Active</span>
           </div>
         </div>
       </div>

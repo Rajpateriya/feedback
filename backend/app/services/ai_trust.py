@@ -1,17 +1,16 @@
 import re
-from typing import Tuple
-from ..models.review import ModerationRule
+from typing import Tuple, Optional, Any
 
 POSITIVE_WORDS = {
     "great", "excellent", "amazing", "love", "perfect", "fantastic", "best", "good",
     "awesome", "stellar", "clean", "smooth", "high-end", "premium", "superb", "brilliant",
-    "durable", "fast", "reliable", "satisfied", "recommend", "flawless", "crisp"
+    "durable", "fast", "reliable", "satisfied", "recommend", "flawless", "crisp", "comfortable", "cushion"
 }
 
 NEGATIVE_WORDS = {
     "terrible", "bad", "horrible", "awful", "worst", "broken", "failed", "scam",
     "useless", "disappointed", "poor", "waste", "defective", "refund", "crash",
-    "garbage", "hated", "cheap", "flimsy", "lag", "buggy"
+    "garbage", "hated", "cheap", "flimsy", "lag", "buggy", "uncomfortable", "pain"
 }
 
 RISK_KEYWORDS = {
@@ -19,7 +18,7 @@ RISK_KEYWORDS = {
     "hazard", "poison", "illegal", "death", "toxic"
 }
 
-def analyze_review_trust(title: str, body: str, rating: int, verified: bool, rule: ModerationRule = None) -> Tuple[str, float, float, float, str]:
+def analyze_review_trust(title: str, body: str, rating: int, verified: bool, rule: Optional[Any] = None) -> Tuple[str, float, float, float, str]:
     """
     Returns:
     (sentiment_label, sentiment_score, toxicity_score, spam_score, suggested_status)
@@ -31,9 +30,27 @@ def analyze_review_trust(title: str, body: str, rating: int, verified: bool, rul
     neg_count = sum(1 for w in words if w in NEGATIVE_WORDS)
     risk_count = sum(1 for w in words if w in RISK_KEYWORDS)
     
+    # Extract rule values whether rule is dict or object
+    auto_flag_keywords = ""
+    min_rating = 4
+    max_toxicity = 0.15
+    req_verified = True
+    
+    if rule:
+        if isinstance(rule, dict):
+            auto_flag_keywords = rule.get("auto_flag_keywords", "")
+            min_rating = rule.get("min_rating_for_auto_approve", 4)
+            max_toxicity = rule.get("max_toxicity_threshold", 0.15)
+            req_verified = rule.get("require_verified_purchase", True)
+        else:
+            auto_flag_keywords = getattr(rule, "auto_flag_keywords", "")
+            min_rating = getattr(rule, "min_rating_for_auto_approve", 4)
+            max_toxicity = getattr(rule, "max_toxicity_threshold", 0.15)
+            req_verified = getattr(rule, "require_verified_purchase", True)
+            
     # Check rule keywords if custom
-    if rule and rule.auto_flag_keywords:
-        custom_keywords = [k.strip().lower() for k in rule.auto_flag_keywords.split(",") if k.strip()]
+    if auto_flag_keywords:
+        custom_keywords = [k.strip().lower() for k in auto_flag_keywords.split(",") if k.strip()]
         risk_count += sum(1 for k in custom_keywords if k in combined_text)
         
     # Sentiment calculation
@@ -73,11 +90,7 @@ def analyze_review_trust(title: str, body: str, rating: int, verified: bool, rul
         spam_score += 0.45
     spam_score = max(0.01, min(0.95, round(spam_score, 2)))
     
-    # Rule matching
-    min_rating = rule.min_rating_for_auto_approve if rule else 4
-    max_toxicity = rule.max_toxicity_threshold if rule else 0.15
-    req_verified = rule.require_verified_purchase if rule else True
-    
+    # Decision logic
     if toxicity_score >= 0.5 or risk_count > 0:
         suggested_status = "flagged"
     elif toxicity_score > max_toxicity or spam_score > 0.4:
