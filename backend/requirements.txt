@@ -4,3 +4,4 @@ pymongo>=4.9.0
 motor>=3.7.0
 pydantic>=2.8.0
 python-multipart>=0.0.9
+python-dotenv>=1.0.0

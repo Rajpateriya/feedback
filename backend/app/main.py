@@ -39,6 +39,20 @@ def get_products():
     """Top-level products endpoint for frontend selectors."""
     return list(products_col.find({}, {"_id": 0}))
 
+@app.get("/api/tags")
+def get_tags():
+    """Retrieve review tags directly from MongoDB Atlas."""
+    from .database import tags_col
+    docs = list(tags_col.find({}, {"name": 1, "_id": 0}))
+    return [d["name"] for d in docs]
+
+@app.get("/api/channels")
+def get_channels():
+    """Retrieve sales channels directly from MongoDB Atlas."""
+    from .database import channels_col
+    docs = list(channels_col.find({}, {"name": 1, "_id": 0}))
+    return [d["name"] for d in docs]
+
 @app.get("/api/health")
 def healthcheck():
     try:

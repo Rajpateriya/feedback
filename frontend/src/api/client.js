@@ -102,5 +102,14 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(productData)
     });
+  },
+
+  // Tags & Channels from MongoDB
+  getTags: () => {
+    return request('/api/tags');
+  },
+
+  getChannels: () => {
+    return request('/api/channels');
   }
 };

@@ -1,67 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 
-const DEFAULT_SHOE_PRODUCTS = [
-  { sku: 'SHOE-NIKE-PULSE', name: 'Nike Air Max Pulse', category: 'Air Cushioning' },
-  { sku: 'SHOE-ADIDAS-BOOST', name: 'Adidas Ultraboost Light', category: 'Performance Run' },
-  { sku: 'SHOE-AJ1-RETRO', name: 'Air Jordan 1 High OG', category: 'Heritage Classic' },
-  { sku: 'SHOE-NB-9060', name: 'New Balance 9060', category: 'Chunky Lifestyle' },
-  { sku: 'SHOE-ON-MONSTER', name: 'On Cloudmonster 2', category: 'Max Road Cushion' },
-  { sku: 'SHOE-SALOMON-XT6', name: 'Salomon XT-6 Expanse', category: 'Trail / All-Terrain' },
-];
-
-const SHOE_TAGS = [
-  'Cushioning & Bounce',
-  'True to Size',
-  'Arch Support',
-  'Breathability',
-  'Ankle Lockdown',
-  'Continental Grip',
-  'Wide Foot Friendly',
-  'Durable Outsole'
-];
-
-const SAMPLE_SHOE_PHOTOS = [
-  'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&auto=format&fit=crop&q=80'
-];
-
 export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted, showToast }) {
-  const [productsList, setProductsList] = useState(DEFAULT_SHOE_PRODUCTS);
+  const [productsList, setProductsList] = useState([]);
+  const [tagsList, setTagsList] = useState([]);
+  const [channelsList, setChannelsList] = useState([]);
   const [isCustomProduct, setIsCustomProduct] = useState(false);
   const [customSku, setCustomSku] = useState('');
   const [customName, setCustomName] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(DEFAULT_SHOE_PRODUCTS[0]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [channel, setChannel] = useState('Direct Web');
+  const [channel, setChannel] = useState('');
   const [recommend, setRecommend] = useState(true);
   const [verifiedPurchase, setVerifiedPurchase] = useState(true);
-  const [selectedTags, setSelectedTags] = useState(['Cushioning & Bounce', 'True to Size']);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [photos, setPhotos] = useState([]); // Up to 6 photos
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
 
-  // Load products dynamically from MongoDB backend
+  // Load products, tags, and channels dynamically from MongoDB Atlas backend
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchFormMetadata() {
       try {
-        const prods = await api.getProducts();
+        const [prods, tags, chs] = await Promise.all([
+          api.getProducts(),
+          api.getTags(),
+          api.getChannels()
+        ]);
         if (prods && prods.length > 0) {
           setProductsList(prods);
           setSelectedProduct(prods[0]);
         }
-      } catch (_) {}
+        if (tags && tags.length > 0) {
+          setTagsList(tags);
+          setSelectedTags([tags[0], tags[1]].filter(Boolean));
+        }
+        if (chs && chs.length > 0) {
+          setChannelsList(chs);
+          setChannel(chs[0]);
+        }
+      } catch (err) {
+        console.error('Failed to load review form metadata from database:', err);
+      }
     }
-    fetchProducts();
+    fetchFormMetadata();
   }, []);
 
   if (isOpen === false) return null;
@@ -119,13 +106,24 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
     setPhotos(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const loadSamplePhotos = () => {
-    setPhotos(SAMPLE_SHOE_PHOTOS);
-    if (!title) setTitle('Incredible midsole energy return for daily runs');
-    if (!body) setBody('Midsole cushion rebound is outstanding over 25km. Outsole rubber grips wet asphalt without slipping. Lockdown through the midfoot is snug with no heel slippage.');
+  const loadSamplePhotos = async () => {
+    try {
+      const approvedRevs = await api.getReviews({ status: 'approved' });
+      const dbPhotos = (approvedRevs || [])
+        .flatMap(r => (r.images && r.images.length > 0) ? r.images : (r.image_url ? [r.image_url] : []))
+        .filter(Boolean);
+      if (dbPhotos.length > 0) {
+        const uniquePhotos = Array.from(new Set(dbPhotos)).slice(0, 6);
+        setPhotos(uniquePhotos);
+      }
+    } catch (_) {}
+
+    const prodName = selectedProduct?.name || 'Footwear Model';
+    if (!title) setTitle(`Incredible comfort and responsive ride with ${prodName}`);
+    if (!body) setBody(`Midsole cushion rebound is outstanding over 25km. Outsole rubber grips wet asphalt without slipping. Lockdown through the midfoot is snug with no heel slippage.`);
     if (!customerName) setCustomerName('Marcus Vance');
     if (!customerEmail) setCustomerEmail('marcus@sneakers.com');
-    showToast?.('Sample review and 6 shoe photos loaded!', 'success');
+    showToast?.('Sample review loaded from live catalog and reviews!', 'success');
   };
 
   const handleSubmit = async (e) => {
@@ -157,13 +155,13 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
 
       const res = await api.submitReview(payload);
       setSubmittedResult(res);
-      showToast?.('Review published successfully!', 'success');
+      showToast?.('Review submitted to moderation queue!', 'info');
       onReviewSubmitted?.();
       
       // Auto close after brief display
       setTimeout(() => {
         if (onClose) onClose();
-      }, 1500);
+      }, 1800);
     } catch (err) {
       console.error(err);
       showToast?.(err.message || 'Error submitting review', 'error');
@@ -205,15 +203,15 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
 
         {/* Success Banner if submitted */}
         {submittedResult && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 animate-in zoom-in-95 duration-200">
+          <div className="mb-4 p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-950 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
-                <span className="material-symbols-outlined text-[19px]">check_circle</span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#5122fe] to-[#7b4eff] text-white flex items-center justify-center shadow-xs shrink-0">
+                <span className="material-symbols-outlined text-[19px]">hourglass_top</span>
               </div>
               <div className="text-xs sm:text-sm">
-                <strong className="text-emerald-950 font-bold">Review Published Live to Feed!</strong>
-                <span className="text-emerald-800 ml-2 font-medium">
-                  AI Sentiment: {(submittedResult.sentiment_score * 100).toFixed(0)}% &bull; Photos Attached: {(submittedResult.images || []).length} / 6
+                <strong className="text-purple-950 font-bold">Review Sent to Moderation Queue!</strong>
+                <span className="text-purple-800 ml-2 font-medium">
+                  Status: <span className="capitalize font-bold text-[#5122fe]">{submittedResult.status}</span> &bull; Will appear on home page once approved by staff.
                 </span>
               </div>
             </div>
@@ -379,7 +377,7 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
                   Fit & Feel Tags
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {SHOE_TAGS.map((tag) => {
+                  {tagsList.map((tag) => {
                     const isSelected = selectedTags.includes(tag);
                     return (
                       <button
@@ -500,11 +498,9 @@ export default function SubmitReview({ isOpen = true, onClose, onReviewSubmitted
                     onChange={(e) => setChannel(e.target.value)}
                     className="h-8 px-2.5 rounded-xl bg-white border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-[#5122fe] font-semibold cursor-pointer"
                   >
-                    <option value="Direct Web">Direct Web</option>
-                    <option value="Nike SNKRS App">Nike SNKRS App</option>
-                    <option value="Shopify Store">Shopify Store</option>
-                    <option value="Amazon Global">Amazon Global</option>
-                    <option value="In-App iOS">In-App iOS</option>
+                    {channelsList.map((ch) => (
+                      <option key={ch} value={ch}>{ch}</option>
+                    ))}
                   </select>
                 </div>
 

@@ -7,6 +7,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedRating, setSelectedRating] = useState(null);
+  const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [photosOnly, setPhotosOnly] = useState(false);
@@ -19,7 +20,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
   const loadData = async () => {
     try {
       setLoading(true);
-      const [revs, stats] = await Promise.all([
+      const [revs, stats, chs] = await Promise.all([
         api.getReviews({
           status: 'approved',
           rating: selectedRating || undefined,
@@ -27,10 +28,12 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
           sort: sortBy,
           search: effectiveSearch || undefined
         }),
-        api.getAnalyticsOverview()
+        api.getAnalyticsOverview(),
+        api.getChannels()
       ]);
       setReviews(revs);
       setAnalytics(stats);
+      if (chs) setChannels(chs);
     } catch (err) {
       console.error(err);
       showToast?.('Error loading customer reviews', 'error');
@@ -54,9 +57,9 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
   };
 
   const exportAudit = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + ["ID,Title,Rating,Customer,SKU,Product,Channel,Photos,Status,Created At"]
-      + "\n" 
+      + "\n"
       + reviews.map(r => `"${r.id}","${r.title.replace(/"/g, '""')}","${r.rating}","${r.customer_name}","${r.sku}","${r.product_name}","${r.channel}","${(r.images || []).length}","${r.status}","${r.created_at}"`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -75,7 +78,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
-      
+
       {/* Upfront Community Wear-Test Callout with Resembling UI */}
       <div className="bg-gradient-to-r from-purple-50/90 via-white to-purple-50/60 rounded-2xl border border-purple-200/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-3">
@@ -104,7 +107,7 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
       {/* Overview Card: Full Graceful Coverage across max-w-6xl */}
       <div className="bg-white rounded-2xl border border-purple-200/80 shadow-[0_4px_24px_rgba(81,34,254,0.06)] p-5 sm:p-6 transition-all">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
+
           {/* Left Rating Block (Col 1-4) */}
           <div className="md:col-span-5 flex flex-col space-y-3">
             <div className="flex items-center gap-2">
@@ -158,18 +161,17 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             {[5, 4, 3, 2, 1].map((star) => {
               const key = `${star}_star`;
               const data = analytics?.rating_distribution?.[key] || { count: 0, percentage: 0 };
-              const barColor = star >= 4 
-                ? 'bg-gradient-to-r from-purple-600 to-violet-500' 
-                : star === 3 
-                ? 'bg-purple-400' 
-                : 'bg-rose-400';
+              const barColor = star >= 4
+                ? 'bg-gradient-to-r from-purple-600 to-violet-500'
+                : star === 3
+                  ? 'bg-purple-400'
+                  : 'bg-rose-400';
               return (
                 <button
                   key={star}
                   onClick={() => setSelectedRating(selectedRating === star ? null : star)}
-                  className={`w-full flex items-center gap-2 text-xs transition-colors p-1 rounded-lg hover:bg-purple-50/70 ${
-                    selectedRating === star ? 'font-semibold text-purple-900 bg-purple-100/60' : 'text-slate-600'
-                  }`}
+                  className={`w-full flex items-center gap-2 text-xs transition-colors p-1 rounded-lg hover:bg-purple-50/70 ${selectedRating === star ? 'font-semibold text-purple-900 bg-purple-100/60' : 'text-slate-600'
+                    }`}
                 >
                   <span className="w-6 text-left flex items-center gap-0.5 text-[11px]">
                     <span>{star}</span>
@@ -224,27 +226,18 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             <span className="material-symbols-outlined text-[14px] text-emerald-600 material-symbols-filled">verified</span>
             <span>{analytics ? analytics.verified_percentage : 0}% Verified Buyer Reviews</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[14px] text-purple-600">timer</span>
-            <span>{analytics ? analytics.median_sla_minutes : 0}m SLA Triage Turnaround</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[14px] text-purple-600">security</span>
-            <span>Live MongoDB Backend Active</span>
-          </div>
         </div>
       </div>
 
       {/* Filter Toolbar with Photos-Only Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 rounded-2xl border border-purple-200/80 shadow-2xs">
-        
+
         {/* Rating Pills & Photo Toggle */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
             onClick={() => setSelectedRating(null)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
-              selectedRating === null ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold shadow-xs' : 'text-purple-900/70 hover:bg-purple-50'
-            }`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${selectedRating === null ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold shadow-xs' : 'text-purple-900/70 hover:bg-purple-50'
+              }`}
           >
             All Ratings
           </button>
@@ -252,9 +245,8 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
             <button
               key={s}
               onClick={() => setSelectedRating(selectedRating === s ? null : s)}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
-                selectedRating === s ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold shadow-xs' : 'text-purple-900/70 hover:bg-purple-50'
-              }`}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${selectedRating === s ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white font-semibold shadow-xs' : 'text-purple-900/70 hover:bg-purple-50'
+                }`}
             >
               <span>{s}</span>
               <span className="material-symbols-outlined text-[12px] material-symbols-filled text-amber-400">star</span>
@@ -264,11 +256,10 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
           {/* Toggle Photos Only */}
           <button
             onClick={() => setPhotosOnly(!photosOnly)}
-            className={`ml-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
-              photosOnly
+            className={`ml-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${photosOnly
                 ? 'bg-purple-700 text-white border-purple-700 shadow-xs'
                 : 'bg-purple-50/80 text-purple-800 border-purple-200 hover:bg-purple-100'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[14px]">photo_camera</span>
             <span>With Photos ({reviews.filter(r => (r.images && r.images.length > 0) || r.image_url).length})</span>
@@ -280,13 +271,12 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
-            className="h-8 px-2.5 rounded-xl bg-purple-50/60 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-purple-500 font-medium"
+            className="h-8 px-2.5 rounded-xl bg-purple-50/60 border border-purple-200 text-xs text-purple-950 focus:outline-none focus:border-purple-500 font-medium cursor-pointer"
           >
             <option value="">All Channels</option>
-            <option value="Direct Web">Direct Web</option>
-            <option value="Amazon Global">Amazon Global</option>
-            <option value="Shopify Store">Shopify Store</option>
-            <option value="In-App iOS">In-App iOS</option>
+            {channels.map((ch) => (
+              <option key={ch} value={ch}>{ch}</option>
+            ))}
           </select>
 
           <select
@@ -485,11 +475,11 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
 
       {/* Interactive Photo Lightbox Dialog */}
       {lightbox && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
           onClick={() => setLightbox(null)}
         >
-          <div 
+          <div
             className="relative max-w-4xl w-full bg-slate-950 rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -550,9 +540,8 @@ export default function CustomerReviewsHub({ onNavigateWrite, showToast, searchQ
                 <button
                   key={i}
                   onClick={() => setLightbox({ ...lightbox, currentIndex: i })}
-                  className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    lightbox.currentIndex === i ? 'border-purple-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
+                  className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${lightbox.currentIndex === i ? 'border-purple-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <img src={img} alt="Thumb" className="w-full h-full object-cover" />
                 </button>

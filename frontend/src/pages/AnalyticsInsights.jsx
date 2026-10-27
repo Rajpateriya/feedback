@@ -41,7 +41,8 @@ export default function AnalyticsInsights({ showToast, onOpenConfigRules }) {
     csvContent += `Overview,Verified Purchase (%),${data.verified_percentage}\n`;
     
     // Footwear models from live MongoDB telemetry
-    shoeModels.forEach((shoe) => {
+    const exportModels = data.product_telemetry || [];
+    exportModels.forEach((shoe) => {
       csvContent += `Footwear Model,${shoe.name} - Rating,${shoe.baseRating}\n`;
       csvContent += `Footwear Model,${shoe.name} - Reviews,${shoe.baseVolume}\n`;
     });

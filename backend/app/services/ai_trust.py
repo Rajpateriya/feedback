@@ -90,13 +90,9 @@ def analyze_review_trust(title: str, body: str, rating: int, verified: bool, rul
         spam_score += 0.45
     spam_score = max(0.01, min(0.95, round(spam_score, 2)))
     
-    # Decision logic
-    if toxicity_score >= 0.5 or risk_count > 0:
+    # Moderation Queue Routing: all reviews must be triaged in the moderation queue
+    if toxicity_score >= 0.5 or risk_count > 0 or toxicity_score > max_toxicity or spam_score > 0.4:
         suggested_status = "flagged"
-    elif toxicity_score > max_toxicity or spam_score > 0.4:
-        suggested_status = "flagged"
-    elif (rating >= min_rating) and (not req_verified or verified) and (toxicity_score <= max_toxicity):
-        suggested_status = "approved"
     else:
         suggested_status = "pending"
         
